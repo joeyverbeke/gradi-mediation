@@ -1,4 +1,7 @@
 __pycache__/
 .venv/
 *.wav
+asr_results.txt
 .DS_Store
+third_party/*
+!third_party/README.md
