@@ -6,3 +6,5 @@ asr_results.txt
 third_party/*
 !third_party/README.md
 llm_pairs.jsonl
+logs/sessions/*
+!logs/sessions/README.md

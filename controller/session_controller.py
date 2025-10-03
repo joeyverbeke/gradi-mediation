@@ -1,0 +1,388 @@
+"""Session controller that coordinates VAD, ASR, LLM, and TTS for the ESP bridge."""
+
+from __future__ import annotations
+
+import json
+import logging
+import math
+import time
+import uuid
+from array import array
+from pathlib import Path
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from typing import Optional
+
+from asr import TranscriptionResult, WhisperCppTranscriber
+from desktop_vad import VADConfig
+from llm import TransformResult, VLLMTransformer
+from tts import KokoroStreamer
+
+from .esp_bridge import ESPAudioBridge
+from .vad_stream import SpeechSegment, SpeechStartEvent, VADStream
+
+BLANK_TRANSCRIPT_MARKERS = {
+    "[BLANK_AUDIO]",
+    "[BLANK]",
+    "[SILENCE]",
+    "[EMPTY]",
+}
+
+LOGGER = logging.getLogger("session_controller")
+if not LOGGER.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    LOGGER.addHandler(handler)
+LOGGER.setLevel(logging.INFO)
+
+
+@dataclass(frozen=True)
+class SessionControllerConfig:
+    """Configuration knobs for the orchestrator."""
+
+    sample_rate: int = 16_000
+    playback_sample_rate: int = 16_000
+    vad_config: VADConfig = field(default_factory=VADConfig)
+    vad_preroll_frames: int = 2
+    max_capture_seconds: float = 6.0
+    asr_timeout: float = 15.0
+    llm_timeout: float = 20.0
+    tts_first_chunk_timeout: float = 5.0
+    playback_timeout: float = 20.0
+    tts_expected_sample_rate: int = 24_000
+    log_path: Optional[Path] = None
+
+
+class SessionController:
+    """High-level orchestrator that binds all desktop modules."""
+
+    def __init__(
+        self,
+        *,
+        esp: ESPAudioBridge,
+        asr: WhisperCppTranscriber,
+        llm: VLLMTransformer,
+        tts: KokoroStreamer,
+        config: SessionControllerConfig,
+    ) -> None:
+        self.esp = esp
+        self.asr = asr
+        self.llm = llm
+        self.tts = tts
+        self.config = config
+
+        self.vad_stream = VADStream(config.vad_config, preroll_frames=config.vad_preroll_frames)
+
+        self.state = "Idle"
+        self._processing_segment = False
+        self._current_session_id: Optional[str] = None
+        self._capture_started_at: Optional[float] = None
+        self._stop_requested = False
+
+        self._log_path = config.log_path
+        self._log_file = None
+        if self._log_path is not None:
+            self._log_path.parent.mkdir(parents=True, exist_ok=True)
+            self._log_file = self._log_path.open("a", encoding="utf-8")
+
+    # ------------------------------------------------------------------
+    # Public API
+
+    def stop(self) -> None:
+        self._stop_requested = True
+
+    def close(self) -> None:
+        if self._log_file is not None:
+            self._log_file.close()
+            self._log_file = None
+
+    def run(self, *, max_cycles: Optional[int] = None) -> None:
+        cycles_completed = 0
+        self._transition("Idle", reason="controller.start")
+
+        while not self._stop_requested:
+            if max_cycles is not None and cycles_completed >= max_cycles:
+                break
+
+            if self._processing_segment:
+                # Drain serial input but do not feed VAD while busy.
+                self.esp.read_audio_chunk(timeout=0.2)
+                continue
+
+            chunk = self.esp.read_audio_chunk(timeout=0.5)
+            if chunk is None:
+                continue
+
+            for event in self.vad_stream.add_audio(chunk):
+                if isinstance(event, SpeechStartEvent):
+                    self._handle_capture_start(event)
+                elif isinstance(event, SpeechSegment):
+                    success = self._handle_segment(event)
+                    if success:
+                        cycles_completed += 1
+                        idle_reason = "cycle.complete"
+                    else:
+                        idle_reason = "cycle.discarded"
+                    self._transition("Idle", reason=idle_reason, cycles=cycles_completed)
+                    self._current_session_id = None
+                    self._capture_started_at = None
+                    if max_cycles is not None and cycles_completed >= max_cycles:
+                        return
+                else:  # pragma: no cover - defensive
+                    continue
+
+    # ------------------------------------------------------------------
+    # Event handlers
+
+    def _handle_capture_start(self, event: SpeechStartEvent) -> None:
+        if self._processing_segment:
+            return
+        self._current_session_id = uuid.uuid4().hex[:8]
+        self._capture_started_at = time.monotonic()
+        self._transition(
+            "CaptureRequested",
+            start_time=event.start_time,
+            start_byte=event.start_byte,
+        )
+
+    def _handle_segment(self, segment: SpeechSegment) -> bool:
+        if self._current_session_id is None:
+            self._current_session_id = uuid.uuid4().hex[:8]
+        self._processing_segment = True
+
+        segment_duration = segment.end_time - segment.start_time
+        if segment_duration > self.config.max_capture_seconds:
+            self._transition(
+                "ErrorTimeout",
+                stage="capture",
+                reason="segment.too_long",
+                duration=segment_duration,
+            )
+            self._processing_segment = False
+            return False
+
+        try:
+            asr_result = self._run_asr(segment)
+            transcript = asr_result.text.strip()
+            if self._is_blank_transcript(transcript):
+                self._transition("ReturnToIdle", reason="segment.discarded", cause="blank_transcript")
+                return False
+            llm_result = self._run_llm(asr_result)
+            playback_meta = self._run_tts_and_play(llm_result)
+            self._transition(
+                "ReturnToIdle",
+                reason="playback.complete",
+                playback=playback_meta,
+            )
+            return True
+        except Exception as exc:  # pragma: no cover - error path
+            self._transition("ErrorTimeout", stage="pipeline", error=str(exc))
+            return False
+        finally:
+            self._processing_segment = False
+            self.esp.flush_input()
+
+    # ------------------------------------------------------------------
+    # Pipeline stages
+
+    def _run_asr(self, segment: SpeechSegment) -> TranscriptionResult:
+        start = time.monotonic()
+        self._transition(
+            "ASR",
+            reason="segment.complete",
+            duration=segment.end_time - segment.start_time,
+        )
+        result = self.asr.transcribe_pcm(segment.pcm, sample_rate=self.config.sample_rate)
+        latency = time.monotonic() - start
+        self._transition(
+            "ASR",
+            reason="complete",
+            latency_ms=int(latency * 1000),
+            text_preview=self._truncate(result.text),
+        )
+        if latency > self.config.asr_timeout:
+            raise RuntimeError(f"ASR exceeded timeout ({latency:.2f}s)")
+        return result
+
+    def _run_llm(self, asr_result: TranscriptionResult) -> TransformResult:
+        start = time.monotonic()
+        self._transition(
+            "LLMTransform",
+            reason="start",
+            transcript_preview=self._truncate(asr_result.text),
+        )
+        result = self.llm.transform(asr_result.text)
+        latency = time.monotonic() - start
+        self._transition(
+            "LLMTransform",
+            reason="complete",
+            latency_ms=int(latency * 1000),
+            output_preview=self._truncate(result.output_text),
+        )
+        if latency > self.config.llm_timeout:
+            raise RuntimeError(f"LLM exceeded timeout ({latency:.2f}s)")
+        return result
+
+    def _run_tts_and_play(self, llm_result: TransformResult) -> dict:
+        start = time.monotonic()
+        self._transition(
+            "TTSSynthesis",
+            reason="start",
+            text_preview=self._truncate(llm_result.output_text),
+        )
+
+        pcm_buffer = bytearray()
+        first_chunk_latency: Optional[float] = None
+        headers = {}
+        content_type: Optional[str] = None
+
+        total_bytes = 0
+        elapsed: Optional[float] = None
+        for chunk in self.tts.stream_synthesis(llm_result.output_text):
+            if chunk.headers:
+                headers.update(chunk.headers)
+            if chunk.content_type:
+                content_type = chunk.content_type
+            if chunk.is_last:
+                elapsed = chunk.elapsed_s or (time.monotonic() - start)
+                total_bytes = chunk.total_bytes
+                first_chunk_latency = first_chunk_latency or chunk.first_chunk_latency_s
+                break
+            pcm_buffer.extend(chunk.data)
+            if first_chunk_latency is None and chunk.first_chunk_latency_s is not None:
+                first_chunk_latency = chunk.first_chunk_latency_s
+        else:  # pragma: no cover - defensive guard
+            elapsed = time.monotonic() - start
+            total_bytes = len(pcm_buffer)
+
+        tts_latency = time.monotonic() - start
+        self._transition(
+            "TTSSynthesis",
+            reason="complete",
+            latency_ms=int(tts_latency * 1000),
+            first_chunk_ms=int((first_chunk_latency or 0) * 1000),
+        )
+        if first_chunk_latency is not None and first_chunk_latency > self.config.tts_first_chunk_timeout:
+            raise RuntimeError(f"TTS first chunk exceeded timeout ({first_chunk_latency:.2f}s)")
+
+        pcm = bytes(pcm_buffer)
+        if not pcm:
+            raise RuntimeError('Kokoro synthesis returned no audio data')
+        if total_bytes and total_bytes != len(pcm):
+            # When streaming response omits trailing data we rely on buffer length
+            total_bytes = len(pcm)
+
+        sample_rate = self._infer_sample_rate(headers, content_type)
+        if sample_rate is None:
+            sample_rate = self.config.tts_expected_sample_rate
+
+        pcm, sample_rate = self._resample_if_needed(pcm, sample_rate, self.config.playback_sample_rate)
+        playback_start = time.monotonic()
+        self._transition(
+            "Playback",
+            reason="start",
+            sample_rate=sample_rate,
+            bytes=len(pcm),
+        )
+        self.esp.flush_input()
+        self.esp.play_pcm(pcm, sample_rate=sample_rate)
+        playback_elapsed = time.monotonic() - playback_start
+        self._transition(
+            "Playback",
+            reason="complete",
+            duration_ms=int(playback_elapsed * 1000),
+        )
+        if playback_elapsed > self.config.playback_timeout:
+            raise RuntimeError(f"Playback exceeded timeout ({playback_elapsed:.2f}s)")
+
+        return {
+            "tts_first_chunk_ms": int((first_chunk_latency or 0) * 1000),
+            "tts_elapsed_ms": int((elapsed if elapsed is not None else 0.0) * 1000),
+            "playback_ms": int(playback_elapsed * 1000),
+            "pcm_bytes": len(pcm),
+            "sample_rate": sample_rate,
+        }
+
+    # ------------------------------------------------------------------
+    # Helpers
+
+    def _transition(self, state: str, **metadata) -> None:
+        self.state = state
+        payload = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "state": state,
+        }
+        if self._current_session_id:
+            payload["session"] = self._current_session_id
+        payload.update(metadata)
+        line = json.dumps(payload, ensure_ascii=False)
+        LOGGER.info(line)
+        if self._log_file is not None:
+            self._log_file.write(line + "\n")
+            self._log_file.flush()
+
+    @staticmethod
+    def _truncate(text: str, *, limit: int = 120) -> str:
+        text = text.strip()
+        if len(text) <= limit:
+            return text
+        return text[: limit - 3] + "..."
+
+    @staticmethod
+    def _is_blank_transcript(text: str) -> bool:
+        if not text:
+            return True
+        normalized = text.strip()
+        if not normalized:
+            return True
+        return normalized.upper() in BLANK_TRANSCRIPT_MARKERS
+
+    @staticmethod
+    def _infer_sample_rate(headers: dict, content_type: Optional[str]) -> Optional[int]:
+        keys = [
+            "x-audio-sample-rate",
+            "x-sample-rate",
+            "sample-rate",
+            "samplerate",
+        ]
+        for key in keys:
+            if key in headers:
+                try:
+                    return int(str(headers[key]).strip())
+                except ValueError:
+                    continue
+        if content_type:
+            parts = content_type.split(";")
+            for part in parts:
+                if "=" in part:
+                    name, value = part.split("=", 1)
+                    if name.strip().lower() in {"rate", "samplerate"}:
+                        try:
+                            return int(value.strip())
+                        except ValueError:
+                            continue
+        return None
+
+    @staticmethod
+    def _resample_if_needed(pcm: bytes, src_rate: int, target_rate: int) -> tuple[bytes, int]:
+        if target_rate <= 0 or src_rate == target_rate:
+            return pcm, src_rate
+        if target_rate > src_rate:
+            raise ValueError("Upsampling is not supported for playback")
+
+        samples = array("h", pcm)
+        ratio = src_rate / target_rate
+        target_length = max(1, int(len(samples) / ratio))
+        resampled = array("h", [0] * target_length)
+        for i in range(target_length):
+            src_index = i * ratio
+            left = int(math.floor(src_index))
+            right = min(left + 1, len(samples) - 1)
+            frac = src_index - left
+            if right == left:
+                value = samples[left]
+            else:
+                value = int(round(samples[left] + (samples[right] - samples[left]) * frac))
+            resampled[i] = value
+        return resampled.tobytes(), target_rate
+

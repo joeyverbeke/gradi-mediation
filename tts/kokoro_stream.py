@@ -90,6 +90,7 @@ class SynthesisChunk:
     first_chunk_latency_s: Optional[float] = None
     elapsed_s: Optional[float] = None
     content_type: Optional[str] = None
+    headers: Dict[str, str] | None = None
 
 
 @dataclass(frozen=True)
@@ -146,6 +147,8 @@ class KokoroStreamer:
                 detail = self._extract_error_detail(response)
                 raise RuntimeError(f"Kokoro TTS returned JSON payload instead of audio: {detail}")
 
+            headers = {k.lower(): v for k, v in response.headers.items()}
+
             sequence = 0
             total_bytes = 0
             first_chunk_latency: Optional[float] = None
@@ -165,6 +168,7 @@ class KokoroStreamer:
                     total_bytes=total_bytes,
                     first_chunk_latency_s=first_chunk_latency if sequence == 1 else None,
                     content_type=content_type,
+                    headers=headers,
                 )
 
             elapsed = time.monotonic() - start_time
@@ -176,6 +180,7 @@ class KokoroStreamer:
                 first_chunk_latency_s=first_chunk_latency,
                 elapsed_s=elapsed,
                 content_type=content_type,
+                headers=headers,
             )
         finally:
             response.close()
