@@ -26,7 +26,21 @@ BLANK_TRANSCRIPT_MARKERS = {
     "[BLANK]",
     "[SILENCE]",
     "[EMPTY]",
+    "[NO_SPEECH]",
 }
+
+PARENTHETICAL_NOISE_TOKENS = {
+    "music",
+    "upbeat music",
+    "background music",
+    "applause",
+    "laughter",
+    "silence",
+    "noise",
+    "static",
+}
+
+PUNCT_ONLY_CHARSET = set(".,!?:;-'\"()[]{} ")
 
 LOGGER = logging.getLogger("session_controller")
 if not LOGGER.handlers:
@@ -45,6 +59,9 @@ class SessionControllerConfig:
     vad_config: VADConfig = field(default_factory=VADConfig)
     vad_preroll_frames: int = 2
     max_capture_seconds: float = 6.0
+    min_segment_duration: float = 0.3
+    min_mean_abs_amplitude: float = 200.0
+    capture_resume_delay: float = 0.75
     asr_timeout: float = 15.0
     llm_timeout: float = 20.0
     tts_first_chunk_timeout: float = 5.0
@@ -78,6 +95,7 @@ class SessionController:
         self._current_session_id: Optional[str] = None
         self._capture_started_at: Optional[float] = None
         self._stop_requested = False
+        self._capture_suspended_until: float = 0.0
 
         self._log_path = config.log_path
         self._log_file = None
@@ -111,6 +129,10 @@ class SessionController:
 
             chunk = self.esp.read_audio_chunk(timeout=0.5)
             if chunk is None:
+                continue
+
+            if time.monotonic() < self._capture_suspended_until:
+                # Drop audio while waiting for playback tail to settle.
                 continue
 
             for event in self.vad_stream.add_audio(chunk):
@@ -151,6 +173,17 @@ class SessionController:
         self._processing_segment = True
 
         segment_duration = segment.end_time - segment.start_time
+        if segment_duration < self.config.min_segment_duration:
+            self._transition(
+                "ReturnToIdle",
+                reason="segment.discarded",
+                cause="segment.too_short",
+                duration=segment_duration,
+            )
+            self._processing_segment = False
+            self.esp.flush_input()
+            return False
+
         if segment_duration > self.config.max_capture_seconds:
             self._transition(
                 "ErrorTimeout",
@@ -161,6 +194,19 @@ class SessionController:
             self._processing_segment = False
             return False
 
+        mean_abs_amplitude = self._segment_mean_abs_amplitude(segment.pcm)
+        if mean_abs_amplitude < self.config.min_mean_abs_amplitude:
+            self._transition(
+                "ReturnToIdle",
+                reason="segment.discarded",
+                cause="low_energy",
+                mean_abs=int(mean_abs_amplitude),
+                duration=segment_duration,
+            )
+            self._processing_segment = False
+            self.esp.flush_input()
+            return False
+
         try:
             asr_result = self._run_asr(segment)
             transcript = asr_result.text.strip()
@@ -168,12 +214,22 @@ class SessionController:
                 self._transition("ReturnToIdle", reason="segment.discarded", cause="blank_transcript")
                 return False
             llm_result = self._run_llm(asr_result)
+            if self._is_invalid_llm_output(llm_result.output_text):
+                self._transition(
+                    "ReturnToIdle",
+                    reason="segment.discarded",
+                    cause="llm_diagnostic",
+                    llm_preview=self._truncate(llm_result.output_text),
+                )
+                return False
             playback_meta = self._run_tts_and_play(llm_result)
             self._transition(
                 "ReturnToIdle",
                 reason="playback.complete",
                 playback=playback_meta,
             )
+            self._capture_suspended_until = time.monotonic() + self.config.capture_resume_delay
+            self.vad_stream.reset()
             return True
         except Exception as exc:  # pragma: no cover - error path
             self._transition("ErrorTimeout", stage="pipeline", error=str(exc))
@@ -335,7 +391,62 @@ class SessionController:
         normalized = text.strip()
         if not normalized:
             return True
-        return normalized.upper() in BLANK_TRANSCRIPT_MARKERS
+        upper = normalized.upper()
+        if upper in BLANK_TRANSCRIPT_MARKERS:
+            return True
+
+        lower = normalized.lower()
+        if normalized.startswith("(") and normalized.endswith(")"):
+            inner = lower.strip("() ")
+            if not inner:
+                return True
+            if any(token in inner for token in PARENTHETICAL_NOISE_TOKENS):
+                return True
+
+        if normalized.startswith("[") and normalized.endswith("]"):
+            inner = lower.strip("[] ")
+            if inner in {token.lower() for token in BLANK_TRANSCRIPT_MARKERS}:
+                return True
+
+        if all(ch in PUNCT_ONLY_CHARSET for ch in normalized):
+            return True
+
+        if lower in {"(upbeat music)", "(background noise)", "(silence)"}:
+            return True
+
+        return False
+
+    @staticmethod
+    def _is_invalid_llm_output(text: str) -> bool:
+        if not text.strip():
+            return True
+        lowered = text.lower()
+        forbidden = (
+            "please provide the transcript",
+            "no transcript provided",
+            "there was no transcript",
+            "i'm unable to correct",
+            "transcript is blank",
+            "it seems there was no input",
+        )
+        if any(phrase in lowered for phrase in forbidden):
+            return True
+        if lowered.strip() in {"[no_speech]", "[blank_audio]", "[silence]"}:
+            return True
+        return False
+
+    @staticmethod
+    def _segment_mean_abs_amplitude(pcm: bytes) -> float:
+        if not pcm:
+            return 0.0
+        samples = array("h")
+        samples.frombytes(pcm)
+        if not samples:
+            return 0.0
+        total = 0
+        for sample in samples:
+            total += abs(sample)
+        return total / len(samples)
 
     @staticmethod
     def _infer_sample_rate(headers: dict, content_type: Optional[str]) -> Optional[int]:
@@ -385,4 +496,3 @@ class SessionController:
                 value = int(round(samples[left] + (samples[right] - samples[left]) * frac))
             resampled[i] = value
         return resampled.tobytes(), target_rate
-

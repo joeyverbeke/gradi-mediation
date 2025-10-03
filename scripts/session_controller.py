@@ -60,6 +60,19 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--vad-aggressiveness", type=int, default=2, choices=range(4))
     parser.add_argument("--vad-start-frames", type=int, default=3)
     parser.add_argument("--vad-stop-frames", type=int, default=5)
+    parser.add_argument("--min-segment-duration", type=float, default=0.3, help="Discard segments shorter than this many seconds")
+    parser.add_argument(
+        "--min-segment-mean-abs",
+        type=float,
+        default=200.0,
+        help="Minimum mean absolute amplitude (0-32767) required to keep a segment",
+    )
+    parser.add_argument(
+        "--capture-resume-delay",
+        type=float,
+        default=0.75,
+        help="Seconds to wait after playback before VAD resumes",
+    )
     parser.add_argument("--verbose-esp", action="store_true", help="Print raw ESP protocol logs")
     return parser
 
@@ -133,6 +146,9 @@ def main(argv: Iterable[str] | None = None) -> int:
         vad_config=vad_cfg,
         tts_expected_sample_rate=args.tts_expected_rate,
         log_path=log_path,
+        min_segment_duration=args.min_segment_duration,
+        min_mean_abs_amplitude=args.min_segment_mean_abs,
+        capture_resume_delay=args.capture_resume_delay,
     )
 
     try:

@@ -2,6 +2,8 @@
 #include <cstring>
 #include <math.h>
 #include "driver/i2s.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 
 // ===== Serial and common =====
 static constexpr int SERIAL_BAUD    = 921600;
@@ -37,6 +39,9 @@ static uint32_t lastFlushMs   = 0;
 static bool     spkI2SInstalled   = false;
 static int      spkSampleRateHz   = 22050;
 static uint32_t samplesRemaining  = 0;
+static QueueHandle_t spkEventQueue = nullptr;
+static uint32_t spkSamplesInFlight = 0;
+static bool playbackDonePending    = false;
 
 enum InboundState {
   WAITING_HEADER,
@@ -116,6 +121,9 @@ static void configureI2SSpeaker(int sampleRate) {
     i2s_stop(I2S_PORT_SPK);
     i2s_driver_uninstall(I2S_PORT_SPK);
     spkI2SInstalled = false;
+    spkEventQueue = nullptr;
+    spkSamplesInFlight = 0;
+    playbackDonePending = false;
   }
 
   i2s_config_t config = {
@@ -140,7 +148,7 @@ static void configureI2SSpeaker(int sampleRate) {
       .data_in_num  = I2S_PIN_NO_CHANGE
   };
 
-  if (i2s_driver_install(I2S_PORT_SPK, &config, 0, nullptr) != ESP_OK) {
+  if (i2s_driver_install(I2S_PORT_SPK, &config, 4, &spkEventQueue) != ESP_OK) {
     sendLine("LOG Failed to install I2S TX");
     return;
   }
@@ -153,6 +161,11 @@ static void configureI2SSpeaker(int sampleRate) {
   i2s_start(I2S_PORT_SPK);
 
   spkI2SInstalled = true;
+  spkSamplesInFlight = 0;
+  playbackDonePending = false;
+  if (spkEventQueue) {
+    xQueueReset(spkEventQueue);
+  }
 }
 
 static void playBootTone() {
@@ -173,6 +186,33 @@ static void playBootTone() {
     size_t written = 0;
     i2s_write(I2S_PORT_SPK, buf, frames * sizeof(int16_t), &written, portMAX_DELAY);
     produced += frames;
+  }
+}
+
+static void pollSpeakerEvents() {
+  if (!spkEventQueue) {
+    if (playbackDonePending && samplesRemaining == 0) {
+      sendLine("PLAYBACK_DONE");
+      playbackDonePending = false;
+    }
+    return;
+  }
+
+  i2s_event_t event;
+  while (xQueueReceive(spkEventQueue, &event, 0) == pdTRUE) {
+    if (event.type == I2S_EVENT_TX_DONE) {
+      uint32_t frames = event.size / sizeof(int16_t);
+      if (frames >= spkSamplesInFlight) {
+        spkSamplesInFlight = 0;
+      } else {
+        spkSamplesInFlight -= frames;
+      }
+    }
+  }
+
+  if (playbackDonePending && samplesRemaining == 0 && spkSamplesInFlight == 0 && inboundState == WAITING_HEADER) {
+    sendLine("PLAYBACK_DONE");
+    playbackDonePending = false;
   }
 }
 
@@ -206,6 +246,8 @@ static void handleFooterByte(char c) {
     footerBuffer[footerIndex] = '\0';
     if (strcmp(footerBuffer, "END") == 0) {
       Serial.println("Finished stream");
+      playbackDonePending = true;
+      pollSpeakerEvents();
     } else {
       Serial.printf("Unexpected footer: %s\n", footerBuffer);
     }
@@ -220,6 +262,8 @@ static void pumpPcmToI2S() {
   static int16_t i2sBuffer[256];
   size_t queued = 0;
 
+  pollSpeakerEvents();
+
   while (samplesRemaining > 0 && Serial.available() >= 2) {
     uint8_t raw[2];
     if (Serial.readBytes(raw, 2) != 2) break;
@@ -231,6 +275,7 @@ static void pumpPcmToI2S() {
     if (queued == (sizeof(i2sBuffer) / sizeof(i2sBuffer[0]))) {
       size_t written = 0;
       i2s_write(I2S_PORT_SPK, i2sBuffer, queued * sizeof(int16_t), &written, portMAX_DELAY);
+      spkSamplesInFlight += written / sizeof(int16_t);
       queued = 0;
     }
   }
@@ -238,12 +283,15 @@ static void pumpPcmToI2S() {
   if (queued > 0) {
     size_t written = 0;
     i2s_write(I2S_PORT_SPK, i2sBuffer, queued * sizeof(int16_t), &written, portMAX_DELAY);
+    spkSamplesInFlight += written / sizeof(int16_t);
   }
 
   if (samplesRemaining == 0 && inboundState == STREAMING_PCM) {
     inboundState = WAITING_FOOTER;
     Serial.println("Awaiting END footer");
   }
+
+  pollSpeakerEvents();
 }
 
 static void handleInboundSerial() {
@@ -284,6 +332,7 @@ void setup() {
 }
 
 void loop() {
+  pollSpeakerEvents();
   // 1) Service inbound speaker stream and commands first to avoid RX overflow
   handleInboundSerial();
 

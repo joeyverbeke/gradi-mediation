@@ -106,6 +106,17 @@ class VADStream:
 
         return events
 
+    def reset(self) -> None:
+        """Clear buffered audio and state to avoid spurious activations."""
+
+        self._buffer.clear()
+        self._processed_bytes = 0
+        self._cursor = 0
+        self._active = False
+        self._speech_run = 0
+        self._silence_run = 0
+        self._start_frame = 0
+
     def _slice_segment(self, start_byte: int, end_byte: int) -> SpeechSegment:
         start_rel = start_byte - self._processed_bytes
         end_rel = end_byte - self._processed_bytes
@@ -129,4 +140,3 @@ class VADStream:
         self._speech_run = 0
         self._silence_run = 0
         self._start_frame = 0
-
