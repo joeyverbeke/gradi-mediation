@@ -15,7 +15,12 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from asr import WhisperCppConfig, WhisperCppTranscriber
+from asr import (
+    FasterWhisperConfig,
+    FasterWhisperTranscriber,
+    WhisperCppConfig,
+    WhisperCppTranscriber,
+)
 from controller import ESPAudioBridge, SessionController, SessionControllerConfig
 from desktop_vad import VADConfig
 from llm import VLLMConfig, VLLMTransformer
@@ -28,8 +33,47 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--port", required=True, help="Serial port for the ESP32-S3 (e.g. /dev/ttyACM0)")
     parser.add_argument("--baud", type=int, default=921_600, help="Serial baudrate (default 921600)")
-    parser.add_argument("--whisper-binary", type=Path, required=True, help="Path to whisper.cpp executable")
-    parser.add_argument("--whisper-model", type=Path, required=True, help="Path to ggml model file")
+    parser.add_argument(
+        "--asr-engine",
+        choices=("whisper_cpp", "faster_whisper"),
+        default="whisper_cpp",
+        help="ASR backend to use (default: whisper_cpp)",
+    )
+    parser.add_argument("--whisper-binary", type=Path, help="Path to whisper.cpp executable")
+    parser.add_argument("--whisper-model", type=Path, help="Path to ggml model file")
+    parser.add_argument(
+        "--fw-model-dir",
+        type=Path,
+        default=None,
+        help="Directory containing Faster-Whisper model files",
+    )
+    parser.add_argument(
+        "--fw-device",
+        default="cuda",
+        help="Faster-Whisper compute device (cuda or cpu)",
+    )
+    parser.add_argument(
+        "--fw-compute-type",
+        default="float16",
+        help="Faster-Whisper compute type (e.g., float16, float32, int8_float16)",
+    )
+    parser.add_argument(
+        "--fw-language",
+        default=None,
+        help="Optional Faster-Whisper language hint",
+    )
+    parser.add_argument(
+        "--fw-beam-size",
+        type=int,
+        default=1,
+        help="Faster-Whisper beam size (default: 1)",
+    )
+    parser.add_argument(
+        "--fw-temperature",
+        type=float,
+        default=0.0,
+        help="Faster-Whisper sampling temperature (default: 0.0)",
+    )
     parser.add_argument("--llm-base-url", default="http://127.0.0.1:8000/v1", help="vLLM base URL")
     parser.add_argument(
         "--llm-model",
@@ -125,11 +169,26 @@ def main(argv: Iterable[str] | None = None) -> int:
         stop_trigger_frames=args.vad_stop_frames,
     )
 
-    whisper_cfg = WhisperCppConfig(
-        binary_path=args.whisper_binary,
-        model_path=args.whisper_model,
-        sample_rate=vad_cfg.sample_rate,
-    )
+    if args.asr_engine == "whisper_cpp":
+        if not args.whisper_binary or not args.whisper_model:
+            parser.error("--whisper-binary and --whisper-model are required when using whisper_cpp")
+        whisper_cfg = WhisperCppConfig(
+            binary_path=args.whisper_binary,
+            model_path=args.whisper_model,
+            sample_rate=vad_cfg.sample_rate,
+        )
+        transcriber = WhisperCppTranscriber(whisper_cfg)
+    else:
+        model_dir = args.fw_model_dir or Path("third_party/faster-whisper/models")
+        fw_cfg = FasterWhisperConfig(
+            model_dir=model_dir,
+            device=args.fw_device,
+            compute_type=args.fw_compute_type,
+            language=args.fw_language,
+            beam_size=args.fw_beam_size,
+            temperature=args.fw_temperature,
+        )
+        transcriber = FasterWhisperTranscriber(fw_cfg)
     llm_cfg = VLLMConfig(base_url=args.llm_base_url, model=args.llm_model)
     kokoro_cfg = KokoroConfig(
         base_url=args.kokoro_base_url,
@@ -157,7 +216,6 @@ def main(argv: Iterable[str] | None = None) -> int:
         print(f"Failed to open serial port: {exc}", file=sys.stderr)
         return 1
 
-    transcriber = WhisperCppTranscriber(whisper_cfg)
     transformer = VLLMTransformer(llm_cfg)
     streamer = KokoroStreamer(kokoro_cfg)
 

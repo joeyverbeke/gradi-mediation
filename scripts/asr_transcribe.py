@@ -13,12 +13,18 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from asr import TranscriptionResult, WhisperCppConfig, WhisperCppTranscriber
+from asr import (
+    FasterWhisperConfig,
+    FasterWhisperTranscriber,
+    TranscriptionResult,
+    WhisperCppConfig,
+    WhisperCppTranscriber,
+)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Transcribe WAV/PCM files using whisper.cpp",
+        description="Transcribe WAV/PCM files using whisper.cpp or Faster-Whisper",
     )
     parser.add_argument(
         "inputs",
@@ -27,16 +33,20 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Paths to WAV files to transcribe",
     )
     parser.add_argument(
+        "--engine",
+        choices=("whisper_cpp", "faster_whisper"),
+        default="whisper_cpp",
+        help="ASR backend to use (default: whisper_cpp)",
+    )
+    parser.add_argument(
         "--binary",
-        required=True,
         type=Path,
-        help="Path to whisper.cpp executable (e.g., ./whisper.cpp/bin/main)",
+        help="Path to whisper.cpp executable (e.g., ./whisper.cpp/build/bin/whisper-cli)",
     )
     parser.add_argument(
         "--model",
-        required=True,
         type=Path,
-        help="Path to ggml-small model (e.g., models/ggml-small.bin)",
+        help="Path to ggml model for whisper.cpp (e.g., models/ggml-small.bin)",
     )
     parser.add_argument(
         "--language",
@@ -54,6 +64,39 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=[],
         dest="extra_args",
         help="Additional whisper.cpp CLI argument (repeatable)",
+    )
+    parser.add_argument(
+        "--fw-model-dir",
+        type=Path,
+        default=None,
+        help="Directory containing Faster-Whisper model files",
+    )
+    parser.add_argument(
+        "--fw-device",
+        default="cuda",
+        help="Faster-Whisper compute device (default: cuda)",
+    )
+    parser.add_argument(
+        "--fw-compute-type",
+        default="float16",
+        help="Faster-Whisper compute type (default: float16)",
+    )
+    parser.add_argument(
+        "--fw-language",
+        default=None,
+        help="Optional Faster-Whisper language hint",
+    )
+    parser.add_argument(
+        "--fw-beam-size",
+        type=int,
+        default=1,
+        help="Faster-Whisper beam size (default: 1)",
+    )
+    parser.add_argument(
+        "--fw-temperature",
+        type=float,
+        default=0.0,
+        help="Faster-Whisper temperature (default: 0.0)",
     )
     parser.add_argument(
         "--output",
@@ -77,14 +120,28 @@ def main(argv: Iterable[str] | None = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
 
-    cfg = WhisperCppConfig(
-        binary_path=args.binary,
-        model_path=args.model,
-        language=args.language,
-        translate=args.translate,
-        extra_args=args.extra_args,
-    )
-    transcriber = WhisperCppTranscriber(cfg)
+    if args.engine == "whisper_cpp":
+        if not args.binary or not args.model:
+            parser.error("--binary and --model are required when using whisper_cpp")
+        cfg = WhisperCppConfig(
+            binary_path=args.binary,
+            model_path=args.model,
+            language=args.language,
+            translate=args.translate,
+            extra_args=args.extra_args,
+        )
+        transcriber = WhisperCppTranscriber(cfg)
+    else:
+        model_dir = args.fw_model_dir or Path("third_party/faster-whisper/models")
+        fw_cfg = FasterWhisperConfig(
+            model_dir=model_dir,
+            device=args.fw_device,
+            compute_type=args.fw_compute_type,
+            language=args.fw_language,
+            beam_size=args.fw_beam_size,
+            temperature=args.fw_temperature,
+        )
+        transcriber = FasterWhisperTranscriber(fw_cfg)
 
     results: List[TranscriptionResult] = []
     for path in args.inputs:
