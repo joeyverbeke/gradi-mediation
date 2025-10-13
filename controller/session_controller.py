@@ -58,7 +58,7 @@ class SessionControllerConfig:
     playback_sample_rate: int = 16_000
     vad_config: VADConfig = field(default_factory=VADConfig)
     vad_preroll_frames: int = 2
-    max_capture_seconds: float = 6.0
+    max_capture_seconds: Optional[float] = None
     min_segment_duration: float = 0.3
     min_mean_abs_amplitude: float = 200.0
     capture_resume_delay: float = 0.75
@@ -203,7 +203,10 @@ class SessionController:
             self.esp.flush_input()
             return False
 
-        if segment_duration > self.config.max_capture_seconds:
+        if (
+            self.config.max_capture_seconds is not None
+            and segment_duration > self.config.max_capture_seconds
+        ):
             self._transition(
                 "ErrorTimeout",
                 stage="capture",

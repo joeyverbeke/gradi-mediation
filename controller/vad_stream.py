@@ -99,10 +99,19 @@ class VADStream:
         # Prevent cursor from growing unbounded during long idle periods.
         max_buffer = self._frame_bytes * 100  # ~3 seconds at 30 ms frames
         if len(self._buffer) > max_buffer:
-            trim = len(self._buffer) - max_buffer
-            del self._buffer[:trim]
-            self._processed_bytes += trim
-            self._cursor = max(0, self._cursor - trim)
+            trim = 0
+            if self._active:
+                # During active speech we retain everything from the VAD start frame onward.
+                segment_start_rel = self._start_frame * self._frame_bytes - self._processed_bytes
+                if segment_start_rel > 0:
+                    trim = min(len(self._buffer) - max_buffer, segment_start_rel)
+            else:
+                trim = len(self._buffer) - max_buffer
+
+            if trim > 0:
+                del self._buffer[:trim]
+                self._processed_bytes += trim
+                self._cursor = max(0, self._cursor - trim)
 
         return events
 

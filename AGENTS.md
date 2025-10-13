@@ -1,36 +1,30 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `firmware/` holds ESP32-S3 sketches focused on USB commands and I2S wiring.
-- Desktop logic lives in `desktop_vad/`, `asr/`, `llm/`, `tts/`, with orchestration in `controller/`.
-- `scripts/` provides validation CLIs (`esp_audio_tester.py`, `vad_test.py`, `asr_transcribe.py`, `llm_transform.py`, `session_controller.py`).
-- Module notes and validation checklists stay in `docs/`; runtime traces land under `logs/` (JSONL) or gitignored WAV/JSONL artifacts.
-- `third_party/README.md` explains how to fetch whisper.cpp and Kokoro-FastAPI clients without committing vendor code.
+- `firmware/esp32s3_audio_min/` implements the ESP32-S3 bridge; it now emits binary `AUD0` frames and obeys `PAUSE` / `RESUME` commands.
+- Desktop modules live under `desktop_vad/`, `asr/` (whisper.cpp, Faster-Whisper, Vosk), `llm/`, and `tts/`, with orchestration in `controller/`.
+- `scripts/` exposes validation CLIs (`esp_audio_tester.py`, `vad_test.py`, `asr_transcribe.py`, `session_controller.py`, etc.).
+- Specifications, validation notes, and roadmap checkpoints are in `docs/`; runtime traces go to `logs/sessions/`.
+- External sources belong in `third_party/` (see its README for clone/build instructions).
 
 ## Build, Test, and Development Commands
-- `uv venv --python 3.10 --seed` — create the project environment.
-- `uv pip install webrtcvad requests soundfile` — install Python dependencies used across modules.
-- `uv run scripts/esp_audio_tester.py --port /dev/ttyACM0 record --seconds 5 --output esp_mic_test.wav` — confirm ESP capture and transport.
-- `uv run scripts/vad_test.py esp_mic_test.wav` — inspect WebRTC VAD start/stop markers.
-- `uv run scripts/asr_transcribe.py --binary third_party/whisper.cpp/build/bin/whisper-cli --model third_party/whisper.cpp/models/ggml-small.bin phrase01.wav` — verify Whisper.cpp integration.
-- `uv run scripts/session_controller.py --max-cycles 1` — exercise the full Idle→Playback cycle with Kokoro streaming.
+- `uv venv --python 3.10 --seed`  
+  `uv pip install pyserial webrtcvad requests soundfile faster-whisper vosk` — baseline environment.
+- `uv run scripts/esp_audio_tester.py --port /dev/ttyACM0 record --seconds 5 --output esp_mic_test.wav` — exercises the binary mic stream (handles READY/PAUSE/RESUME automatically).
+- `uv run scripts/asr_transcribe.py --asr-engine faster_whisper --fw-model-dir third_party/faster-whisper/models phrase01.wav` — smoke test Faster-Whisper; swap `--asr-engine` for `whisper_cpp` or `vosk` as needed.
+- `uv run scripts/session_controller.py --port /dev/ttyACM0 --kokoro-voice af_bella --max-cycles 1` — full Idle→Playback cycle; add `--verbose-esp` during debugging.
 
 ## Coding Style & Naming Conventions
-- Python uses 4-space indentation, type hints, and descriptive module-level helpers; prefer `snake_case` filenames and `CamelCase` dataclasses.
-- Arduino/C++ should keep constants in `constexpr`, document pin maps inline, and avoid heap allocation inside the audio loop.
-- Logs emitted to stdout must remain single-line JSON to keep ingestion simple.
+- Python: 4-space indent, type hints, `snake_case` modules, `CamelCase` dataclasses, minimal but meaningful comments.
+- Firmware: keep constants in `constexpr`, avoid heap allocations in realtime paths, and restrict UART output to the defined text commands.
+- Log lines consumed by automation must remain single-line JSON, emitted via the controller.
 
 ## Testing Guidelines
-- Each module expects manual validation; capture WAVs, transcript files, or session logs before merging changes.
-- Future automated coverage belongs under `tests/` mirroring package paths, using `pytest` and files named `test_<module>.py`.
-- Attach session traces from `logs/sessions/session_*.jsonl` when reporting regressions or odd audio behavior.
+- Manual validation is expected: capture WAV artifacts, transcript files, or session JSONL before merging.
+- Future automated tests should live under `tests/`, mirror package paths, and use `pytest` with `test_<module>.py` naming.
+- When diagnosing audio regressions, include the relevant `logs/sessions/session_*.jsonl` and note ASR engine / firmware build used.
 
 ## Commit & Pull Request Guidelines
-- Use short imperative commits (e.g., `Add VAD noise gate`). Keep firmware, desktop, and doc updates isolated where practical.
-- Reference roadmap identifiers (B1, C2, E1, etc.) in commit or PR descriptions and list the validation commands you ran.
-- PRs should summarize observed behavior, link relevant artifacts, and note any follow-up risks or TODOs.
-
-## Agent Workflow Tips
-- Re-run `uv run <script> --help` after adding flags to confirm documentation.
-- Update the matching `docs/C*_*.md` whenever behavior or validation steps change.
-- Align work with the four-pass integration plan from `00_summary` to avoid cross-wiring modules prematurely.
+- Use short, imperative commit titles (e.g., `Switch ESP stream to AUD0 frames`). Keep firmware, desktop, and docs changes separated when practical.
+- Reference roadmap IDs (B1, C2, E1, etc.) in PR descriptions and list the validation commands you executed.
+- PRs should summarize observed behavior, link to artifacts (WAV, JSONL), and call out remaining risks or follow-up tasks.
