@@ -7,6 +7,9 @@
 
 // ===== Serial and common =====
 static constexpr int SERIAL_BAUD    = 921600;
+static constexpr uint32_t AUDIO_MAGIC = 0x30445541; // 'AUD0' little-endian
+static constexpr uint8_t AUDIO_VERSION = 1;
+static constexpr uint8_t FRAME_TYPE_AUDIO = 1;
 
 // ===== MIC -> HOST config =====
 static constexpr int MIC_SAMPLE_RATE   = 16000;   // capture rate
@@ -34,6 +37,7 @@ static constexpr int PIN_AMP_SHUTDOWN = 44;  // D7 -> GPIO44 (active HIGH)
 static int16_t  streamBuffer[CHUNK_SAMPLES];
 static size_t   streamSamples = 0;
 static uint32_t lastFlushMs   = 0;
+static bool     micStreamingEnabled = false;
 
 // ===== SPEAKER state =====
 static bool     spkI2SInstalled   = false;
@@ -53,6 +57,14 @@ static char headerBuffer[64];
 static size_t headerIndex = 0;
 static char footerBuffer[8];
 static size_t footerIndex = 0;
+
+struct __attribute__((packed)) AudioFrameHeader {
+  uint32_t magic;
+  uint8_t version;
+  uint8_t frameType;
+  uint16_t reserved;
+  uint32_t payloadBytes;
+};
 
 // ===== Helpers =====
 static void sendLine(const char *line) {
@@ -95,10 +107,20 @@ static void setupI2SMicrophone() {
 
 static void sendAudioChunk() {
   if (streamSamples == 0) return;
+  if (!micStreamingEnabled) {
+    streamSamples = 0;
+    lastFlushMs = millis();
+    return;
+  }
   const size_t byteCount = streamSamples * sizeof(int16_t);
-  char header[24];
-  snprintf(header, sizeof(header), "AUDIO %zu", byteCount);
-  sendLine(header);
+  AudioFrameHeader header = {
+      .magic = AUDIO_MAGIC,
+      .version = AUDIO_VERSION,
+      .frameType = FRAME_TYPE_AUDIO,
+      .reserved = 0,
+      .payloadBytes = static_cast<uint32_t>(byteCount),
+  };
+  Serial.write(reinterpret_cast<uint8_t *>(&header), sizeof(header));
   Serial.write(reinterpret_cast<uint8_t *>(streamBuffer), byteCount);
   streamSamples = 0;
   lastFlushMs = millis();
@@ -192,7 +214,6 @@ static void playBootTone() {
 static void pollSpeakerEvents() {
   if (!spkEventQueue) {
     if (playbackDonePending && samplesRemaining == 0) {
-      sendLine("PLAYBACK_DONE");
       playbackDonePending = false;
     }
     return;
@@ -211,7 +232,6 @@ static void pollSpeakerEvents() {
   }
 
   if (playbackDonePending && samplesRemaining == 0 && spkSamplesInFlight == 0 && inboundState == WAITING_HEADER) {
-    sendLine("PLAYBACK_DONE");
     playbackDonePending = false;
   }
 }
@@ -222,6 +242,10 @@ static void handleHeaderByte(char c) {
 
     if (strcmp(headerBuffer, "STATE?") == 0) {
       publishState();
+    } else if (strcmp(headerBuffer, "PAUSE") == 0) {
+      micStreamingEnabled = false;
+    } else if (strcmp(headerBuffer, "RESUME") == 0) {
+      micStreamingEnabled = true;
     } else {
       int sampleRate = 0, channels = 0, bits = 0;
       uint32_t sampleCount = 0;
@@ -230,9 +254,8 @@ static void handleHeaderByte(char c) {
         configureI2SSpeaker(sampleRate);
         samplesRemaining = sampleCount;
         inboundState = STREAMING_PCM;
-        Serial.printf("Streaming %u mono samples at %d Hz\n", sampleCount, sampleRate);
       } else {
-        Serial.printf("Invalid header: %s\n", headerBuffer);
+        // Unknown command
       }
     }
     headerIndex = 0;
@@ -245,11 +268,10 @@ static void handleFooterByte(char c) {
   if (c == '\n') {
     footerBuffer[footerIndex] = '\0';
     if (strcmp(footerBuffer, "END") == 0) {
-      Serial.println("Finished stream");
       playbackDonePending = true;
       pollSpeakerEvents();
     } else {
-      Serial.printf("Unexpected footer: %s\n", footerBuffer);
+      // Unknown footer; ignore to keep stream binary-only
     }
     footerIndex = 0;
     inboundState = WAITING_HEADER;
@@ -288,7 +310,6 @@ static void pumpPcmToI2S() {
 
   if (samplesRemaining == 0 && inboundState == STREAMING_PCM) {
     inboundState = WAITING_FOOTER;
-    Serial.println("Awaiting END footer");
   }
 
   pollSpeakerEvents();
@@ -326,8 +347,8 @@ void setup() {
   configureI2SSpeaker(spkSampleRateHz);
   playBootTone();
 
-  sendLine("LOG duplex firmware booted");
-  publishState();
+  micStreamingEnabled = false;
+  sendLine("READY");
   lastFlushMs = millis();
 }
 

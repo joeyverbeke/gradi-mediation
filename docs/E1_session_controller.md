@@ -26,10 +26,10 @@ The session controller coordinates the speech loop described in the overall proj
 | ErrorTimeout | Cancel in-flight operations, release resources, log error reason | Recovery complete | Idle |
 
 ## Event Flow and Resource Ownership
-- **CaptureRequest**: triggered by `WebRTCVADProcessor` when speech frames exceed start threshold. Controller notes start timestamp and begins collecting PCM into a ring buffer dedicated to the current session.
+- **CaptureRequest**: triggered by `WebRTCVADProcessor` when speech frames exceed start threshold. Controller notes start timestamp and begins collecting PCM into a ring buffer dedicated to the current session while the ESP remains in streaming mode.
 - **SegmentComplete**: triggered when VAD sees sufficient trailing silence. Mic ownership remains with controller until segment is processed. No new playback may start until `resource.mic` is released.
-- **TTSReady**: Kokoro stream begins. Controller transitions resources: `resource.mic=paused`, `resource.spk=owned`.
-- **PlaybackDone**: fired when Kokoro stream final chunk delivered and ESP acknowledges end of playback.
+- **TTSReady**: Kokoro stream begins. Controller transitions resources: `resource.mic=paused`, `resource.spk=owned`, issues `PAUSE` to the ESP bridge so no mic audio is emitted during playback.
+- **PlaybackDone**: fired when Kokoro stream final chunk delivered and ESP playback completes; controller sends `RESUME` to re-enable mic streaming after a short guard delay.
 - **Timeout/Error**: any stage exceeding its SLA (e.g., ASR > 15 s, vLLM > 20 s, Kokoro first chunk > 5 s, ESP playback stall) transitions to ErrorTimeout, logs cause, and hard-resets resources.
 
 ## Module Integration

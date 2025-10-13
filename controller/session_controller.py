@@ -13,12 +13,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
-from asr import TranscriptionResult, WhisperCppTranscriber
+from asr import ASRTranscriber, TranscriptionResult
 from desktop_vad import VADConfig
 from llm import TransformResult, VLLMTransformer
 from tts import KokoroStreamer
 
-from .esp_bridge import ESPAudioBridge
+from .esp_bridge import ESPAudioBridge, MalformedAudioHeader
 from .vad_stream import SpeechSegment, SpeechStartEvent, VADStream
 
 BLANK_TRANSCRIPT_MARKERS = {
@@ -77,7 +77,7 @@ class SessionController:
         self,
         *,
         esp: ESPAudioBridge,
-        asr: WhisperCppTranscriber,
+        asr: ASRTranscriber,
         llm: VLLMTransformer,
         tts: KokoroStreamer,
         config: SessionControllerConfig,
@@ -127,7 +127,26 @@ class SessionController:
                 self.esp.read_audio_chunk(timeout=0.2)
                 continue
 
-            chunk = self.esp.read_audio_chunk(timeout=0.5)
+            try:
+                chunk = self.esp.read_audio_chunk(timeout=0.5)
+            except MalformedAudioHeader as exc:
+                self._transition(
+                    "FatalError",
+                    stage="capture",
+                    reason="malformed_audio_header",
+                    header=exc.header.hex(),
+                    error_type=exc.__class__.__name__,
+                )
+                raise
+            except Exception as exc:  # pragma: no cover - defensive guard
+                self._transition(
+                    "FatalError",
+                    stage="capture",
+                    reason="audio_read_failed",
+                    error=str(exc),
+                    error_type=exc.__class__.__name__,
+                )
+                raise
             if chunk is None:
                 continue
 
@@ -232,7 +251,12 @@ class SessionController:
             self.vad_stream.reset()
             return True
         except Exception as exc:  # pragma: no cover - error path
-            self._transition("ErrorTimeout", stage="pipeline", error=str(exc))
+            self._transition(
+                "ErrorTimeout",
+                stage="pipeline",
+                error=str(exc),
+                error_type=exc.__class__.__name__,
+            )
             return False
         finally:
             self._processing_segment = False
@@ -340,8 +364,12 @@ class SessionController:
             sample_rate=sample_rate,
             bytes=len(pcm),
         )
-        self.esp.flush_input()
-        self.esp.play_pcm(pcm, sample_rate=sample_rate)
+        self.esp.pause_capture()
+        try:
+            self.esp.flush_input()
+            self.esp.play_pcm(pcm, sample_rate=sample_rate)
+        finally:
+            self.esp.resume_capture()
         playback_elapsed = time.monotonic() - playback_start
         self._transition(
             "Playback",

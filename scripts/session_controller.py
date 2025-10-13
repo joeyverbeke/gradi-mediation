@@ -18,6 +18,8 @@ if str(ROOT) not in sys.path:
 from asr import (
     FasterWhisperConfig,
     FasterWhisperTranscriber,
+    VoskConfig,
+    VoskTranscriber,
     WhisperCppConfig,
     WhisperCppTranscriber,
 )
@@ -35,7 +37,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--baud", type=int, default=921_600, help="Serial baudrate (default 921600)")
     parser.add_argument(
         "--asr-engine",
-        choices=("whisper_cpp", "faster_whisper"),
+        choices=("whisper_cpp", "faster_whisper", "vosk"),
         default="whisper_cpp",
         help="ASR backend to use (default: whisper_cpp)",
     )
@@ -73,6 +75,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
         type=float,
         default=0.0,
         help="Faster-Whisper sampling temperature (default: 0.0)",
+    )
+    parser.add_argument(
+        "--vosk-model-dir",
+        type=Path,
+        default=None,
+        help="Directory containing the Vosk model files",
     )
     parser.add_argument("--llm-base-url", default="http://127.0.0.1:8000/v1", help="vLLM base URL")
     parser.add_argument(
@@ -178,7 +186,7 @@ def main(argv: Iterable[str] | None = None) -> int:
             sample_rate=vad_cfg.sample_rate,
         )
         transcriber = WhisperCppTranscriber(whisper_cfg)
-    else:
+    elif args.asr_engine == "faster_whisper":
         model_dir = args.fw_model_dir or Path("third_party/faster-whisper/models")
         fw_cfg = FasterWhisperConfig(
             model_dir=model_dir,
@@ -189,6 +197,12 @@ def main(argv: Iterable[str] | None = None) -> int:
             temperature=args.fw_temperature,
         )
         transcriber = FasterWhisperTranscriber(fw_cfg)
+    else:
+        vosk_dir = args.vosk_model_dir or Path("third_party/vosk/models/vosk-model-small-en-us-0.15")
+        if not vosk_dir.exists():
+            parser.error(f"Vosk model directory not found: {vosk_dir}")
+        vosk_cfg = VoskConfig(model_path=vosk_dir, sample_rate=vad_cfg.sample_rate)
+        transcriber = VoskTranscriber(vosk_cfg)
     llm_cfg = VLLMConfig(base_url=args.llm_base_url, model=args.llm_model)
     kokoro_cfg = KokoroConfig(
         base_url=args.kokoro_base_url,

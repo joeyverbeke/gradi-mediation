@@ -23,3 +23,15 @@ Add additional dependency notes here as we grow the project.
    ```
 4. Run the latency sanity-check script: `uv run scripts/faster_whisper_test.py phrase01.wav --device cuda`.
 5. Point new ASR integrations at `third_party/faster-whisper/models` (or any model directory you downloaded).
+
+## vosk
+1. Create the model folder: `mkdir -p third_party/vosk/models`.
+2. Download and extract a model, e.g.:
+   ```bash
+   cd third_party/vosk/models
+   curl -LO https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
+   unzip vosk-model-small-en-us-0.15.zip
+   ```
+3. Install the Python bindings inside the venv: `uv pip install vosk soundfile numpy`.
+4. Validate the install with: `uv run scripts/vosk_test.py phrase01.wav --model-dir third_party/vosk/models/vosk-model-small-en-us-0.15`.
+5. Point the ASR scripts or session controller at the extracted directory via `--vosk-model-dir`.

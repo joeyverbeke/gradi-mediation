@@ -3,20 +3,32 @@
 from __future__ import annotations
 
 import time
-from typing import Optional
+from typing import Optional, Tuple
 
 import serial
 
 
 DEFAULT_BAUD = 921_600
 SERIAL_READ_TIMEOUT = 0.2  # seconds per underlying read
-MIC_SAMPLE_RATE = 16_000
 BYTES_PER_SAMPLE = 2
 STREAM_CHUNK_BYTES = 1024
+
+AUDIO_MAGIC = 0x30445541  # 'AUD0' little-endian
+AUDIO_VERSION = 1
+FRAME_TYPE_AUDIO = 1
+FRAME_HEADER_SIZE = 12
 
 
 class SerialTimeoutError(RuntimeError):
     """Raised when the ESP does not respond within the expected time."""
+
+
+class MalformedAudioHeader(RuntimeError):
+    """Raised when an audio frame header from the ESP cannot be parsed."""
+
+    def __init__(self, header: bytes) -> None:
+        super().__init__(f"Malformed audio header: {header.hex()}")
+        self.header = header
 
 
 class ESPAudioBridge:
@@ -38,14 +50,38 @@ class ESPAudioBridge:
             write_timeout=write_timeout,
         )
         self._verbose = verbose
-        self._serial.reset_input_buffer()
         self._serial.reset_output_buffer()
+        self._rx_buffer = bytearray()
+        self._capture_paused = False
+        saw_ready = self._await_ready_banner()
+        if not saw_ready and self._verbose:
+            self._log("<=", "READY banner not observed; continuing")
+        # Force a clean baseline regardless of initial device state
+        self._send_command("PAUSE")
+        self._capture_paused = True
+        self.flush_input()
+        self.resume_capture()
 
     # ------------------------------------------------------------------
     # Lifecycle helpers
 
     def close(self) -> None:
         self._serial.close()
+
+    def _await_ready_banner(self) -> bool:
+        deadline = time.monotonic() + 5.0
+        while True:
+            if time.monotonic() > deadline:
+                return False
+            line = self._serial.readline()
+            if not line:
+                continue
+            text = line.decode("utf-8", errors="replace").strip()
+            if not text:
+                continue
+            self._log("<=", text)
+            if text == "READY":
+                return True
 
     # ------------------------------------------------------------------
     # Logging helpers
@@ -59,72 +95,51 @@ class ESPAudioBridge:
 
     def flush_input(self) -> None:
         self._serial.reset_input_buffer()
+        self._rx_buffer.clear()
 
     def flush_output(self) -> None:
         self._serial.reset_output_buffer()
 
     def read_audio_chunk(self, *, timeout: float = 1.0) -> Optional[bytes]:
-        """Read the next AUDIO chunk from the ESP stream.
-
-        Returns ``None`` if no chunk arrives within ``timeout`` seconds.
-        """
+        """Read the next audio frame payload as raw PCM bytes."""
 
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
-            remaining = deadline - time.monotonic()
-            try:
-                header = self._wait_for_audio_header(timeout=remaining)
-            except SerialTimeoutError:
-                return None
-
-            if header is None:
-                return None
-
-            try:
-                byte_count = int(header.split()[1])
-            except (IndexError, ValueError) as exc:
-                raise RuntimeError(f"Malformed AUDIO header: {header}") from exc
-
-            payload = self._read_exact(byte_count, timeout=2.0)
-            return payload
-        return None
-
-    def _wait_for_audio_header(self, *, timeout: float) -> Optional[str]:
-        deadline = time.monotonic() + timeout
-        while time.monotonic() < deadline:
-            remaining = deadline - time.monotonic()
-            line = self._serial.readline()
-            if not line:
+            remaining = max(0.0, deadline - time.monotonic())
+            frame = self._read_next_frame(remaining)
+            if frame is None:
                 continue
-            text = line.decode("utf-8", errors="replace").strip()
-            if not text:
-                continue
-            if text.startswith("AUDIO "):
-                self._log("<=", text)
-                return text
-            # Forward other log lines to stdout when verbose
-            self._log("<=", text)
+            frame_type, payload = frame
+            if frame_type == FRAME_TYPE_AUDIO:
+                return payload
+            # Ignore non-audio frames (e.g., logs) after logging when verbose
+            if frame_type is not None and self._verbose:
+                self._log("<=", f"Skipped frame type {frame_type}")
         return None
-
-    def _read_exact(self, byte_count: int, timeout: float) -> bytes:
-        data = bytearray()
-        deadline = time.monotonic() + timeout
-        while len(data) < byte_count:
-            chunk = self._serial.read(byte_count - len(data))
-            if chunk:
-                data.extend(chunk)
-                deadline = time.monotonic() + timeout
-            elif time.monotonic() > deadline:
-                raise SerialTimeoutError(
-                    f"Timed out reading binary payload ({len(data)}/{byte_count} bytes)"
-                )
-        return bytes(data)
 
     def write_line(self, line: str) -> None:
         payload = f"{line}\n".encode("ascii")
         self._log("=>", line)
         self._serial.write(payload)
         self._serial.flush()
+
+    def _send_command(self, line: str) -> None:
+        payload = f"{line}\n".encode("ascii")
+        self._log("=>", line)
+        self._serial.write(payload)
+        self._serial.flush()
+
+    def pause_capture(self) -> None:
+        if self._capture_paused:
+            return
+        self._send_command("PAUSE")
+        self._capture_paused = True
+
+    def resume_capture(self) -> None:
+        if not self._capture_paused:
+            return
+        self._send_command("RESUME")
+        self._capture_paused = False
 
     # ------------------------------------------------------------------
     # Playback helpers
@@ -162,3 +177,61 @@ class ESPAudioBridge:
                 next_deadline = time.perf_counter()
         self._serial.flush()
 
+    # ------------------------------------------------------------------
+    # Frame parsing helpers
+
+    def _read_next_frame(self, timeout: float) -> Optional[Tuple[int, bytes]]:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            frame = self._try_extract_frame()
+            if frame is not None:
+                return frame
+            self._fill_rx_buffer(max(0.0, deadline - time.monotonic()))
+        return None
+
+    def _fill_rx_buffer(self, timeout: float) -> None:
+        read_size = self._serial.in_waiting or 1
+        chunk = self._serial.read(read_size)
+        if chunk:
+            self._rx_buffer.extend(chunk)
+        else:
+            if timeout > 0:
+                time.sleep(min(timeout, 0.001))
+
+    def _try_extract_frame(self) -> Optional[Tuple[int, bytes]]:
+        if not self._rx_buffer:
+            return None
+
+        newline_index = self._rx_buffer.find(b"\n")
+        if newline_index != -1 and (len(self._rx_buffer) < FRAME_HEADER_SIZE or int.from_bytes(self._rx_buffer[:4], "little") != AUDIO_MAGIC):
+            line = bytes(self._rx_buffer[:newline_index + 1])
+            del self._rx_buffer[:newline_index + 1]
+            text = line.decode("utf-8", errors="replace").strip()
+            if text:
+                self._log("<=", text)
+            return None
+
+        if len(self._rx_buffer) < FRAME_HEADER_SIZE:
+            return None
+
+        if int.from_bytes(self._rx_buffer[:4], "little") != AUDIO_MAGIC:
+            # drop one byte and retry to resynchronise
+            self._rx_buffer.pop(0)
+            return None
+
+        header = bytes(self._rx_buffer[:FRAME_HEADER_SIZE])
+        version = header[4]
+        frame_type = header[5]
+        payload_len = int.from_bytes(header[8:12], "little")
+
+        if version != AUDIO_VERSION or payload_len < 0 or payload_len > 4_000_000:
+            del self._rx_buffer[:4]
+            raise MalformedAudioHeader(header)
+
+        total_len = FRAME_HEADER_SIZE + payload_len
+        if len(self._rx_buffer) < total_len:
+            return None
+
+        payload = bytes(self._rx_buffer[FRAME_HEADER_SIZE:total_len])
+        del self._rx_buffer[:total_len]
+        return frame_type, payload

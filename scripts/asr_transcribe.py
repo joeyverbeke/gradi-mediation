@@ -17,6 +17,8 @@ from asr import (
     FasterWhisperConfig,
     FasterWhisperTranscriber,
     TranscriptionResult,
+    VoskConfig,
+    VoskTranscriber,
     WhisperCppConfig,
     WhisperCppTranscriber,
 )
@@ -24,7 +26,7 @@ from asr import (
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Transcribe WAV/PCM files using whisper.cpp or Faster-Whisper",
+        description="Transcribe WAV/PCM files using whisper.cpp, Faster-Whisper, or Vosk",
     )
     parser.add_argument(
         "inputs",
@@ -34,7 +36,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--engine",
-        choices=("whisper_cpp", "faster_whisper"),
+        choices=("whisper_cpp", "faster_whisper", "vosk"),
         default="whisper_cpp",
         help="ASR backend to use (default: whisper_cpp)",
     )
@@ -99,6 +101,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Faster-Whisper temperature (default: 0.0)",
     )
     parser.add_argument(
+        "--vosk-model-dir",
+        type=Path,
+        default=None,
+        help="Directory containing the Vosk model (expects subdirs like conf/, am/).",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=Path("asr_results.txt"),
@@ -131,7 +139,7 @@ def main(argv: Iterable[str] | None = None) -> int:
             extra_args=args.extra_args,
         )
         transcriber = WhisperCppTranscriber(cfg)
-    else:
+    elif args.engine == "faster_whisper":
         model_dir = args.fw_model_dir or Path("third_party/faster-whisper/models")
         fw_cfg = FasterWhisperConfig(
             model_dir=model_dir,
@@ -142,6 +150,12 @@ def main(argv: Iterable[str] | None = None) -> int:
             temperature=args.fw_temperature,
         )
         transcriber = FasterWhisperTranscriber(fw_cfg)
+    else:
+        model_path = args.vosk_model_dir or Path("third_party/vosk/models/vosk-model-small-en-us-0.15")
+        if not model_path.exists():
+            parser.error(f"Vosk model directory not found: {model_path}")
+        vosk_cfg = VoskConfig(model_path=model_path)
+        transcriber = VoskTranscriber(vosk_cfg)
 
     results: List[TranscriptionResult] = []
     for path in args.inputs:

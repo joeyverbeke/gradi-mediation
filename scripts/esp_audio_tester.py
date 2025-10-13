@@ -14,61 +14,26 @@ import wave
 
 import serial
 
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from controller.esp_bridge import ESPAudioBridge, SerialTimeoutError
+
 DEFAULT_BAUD = 921_600
-SERIAL_READ_TIMEOUT = 0.2  # seconds per underlying read
 MIC_SAMPLE_RATE = 16_000
 BYTES_PER_SAMPLE = 2
-STREAM_CHUNK_BYTES = 1024
-
-
-class SerialTimeoutError(RuntimeError):
-    pass
 
 
 class EspAudioTester:
     """Wraps the USB serial protocol exposed by the minimal firmware."""
 
     def __init__(self, port: str, baudrate: int, verbose: bool = True) -> None:
-        self._serial = serial.Serial(
-            port=port,
-            baudrate=baudrate,
-            timeout=SERIAL_READ_TIMEOUT,
-            write_timeout=2.0,
-        )
         self._verbose = verbose
-        self._serial.reset_input_buffer()
+        self._bridge = ESPAudioBridge(port=port, baudrate=baudrate, verbose=verbose)
 
     def close(self) -> None:
-        self._serial.close()
-
-    def read_line(self, timeout: float = 5.0) -> str:
-        deadline = time.monotonic() + timeout
-        while time.monotonic() < deadline:
-            raw = self._serial.readline()
-            if raw:
-                text = raw.decode("utf-8", errors="replace").strip()
-                if self._verbose:
-                    print(f"<= {text}")
-                return text
-        raise SerialTimeoutError("Timed out waiting for serial line")
-
-    def _clear_input(self) -> None:
-        self._serial.reset_input_buffer()
-        self._serial.reset_output_buffer()
-
-    def read_exact(self, byte_count: int, timeout: float) -> bytes:
-        data = bytearray()
-        deadline = time.monotonic() + timeout
-        while len(data) < byte_count:
-            chunk = self._serial.read(byte_count - len(data))
-            if chunk:
-                data.extend(chunk)
-                deadline = time.monotonic() + timeout
-            elif time.monotonic() > deadline:
-                raise SerialTimeoutError(
-                    f"Timed out reading binary payload ({len(data)}/{byte_count} bytes)"
-                )
-        return bytes(data)
+        self._bridge.close()
 
     def record(self, seconds: int, output_path: Path) -> None:
         if seconds <= 0:
@@ -81,21 +46,19 @@ class EspAudioTester:
             print(f"   capturing {seconds}s ({target_bytes} bytes) from continuous stream")
 
         # Drop any buffered audio before we start counting seconds.
-        self._clear_input()
+        self._bridge.pause_capture()
+        self._bridge.flush_input()
+        self._bridge.resume_capture()
 
         deadline = time.monotonic() + max(5.0, seconds * 1.5)
         while len(captured) < target_bytes:
             remaining = deadline - time.monotonic()
             if remaining <= 0:
-                raise SerialTimeoutError("Timed out waiting for AUDIO chunk header")
+                raise SerialTimeoutError("Timed out waiting for audio frame")
 
-            header = self._wait_for_audio_header(timeout=remaining)
-            try:
-                chunk_bytes = int(header.split()[1])
-            except (IndexError, ValueError) as exc:
-                raise RuntimeError(f"Malformed AUDIO header: {header}") from exc
-
-            chunk = self.read_exact(chunk_bytes, timeout=2.0)
+            chunk = self._bridge.read_audio_chunk(timeout=min(1.0, remaining))
+            if chunk is None:
+                continue
             captured.extend(chunk)
             deadline = time.monotonic() + 2.0
             if self._verbose:
@@ -116,47 +79,14 @@ class EspAudioTester:
         processed_pcm, playback_rate = self._resample_if_needed(mono_pcm, src_rate, target_rate)
         sample_count = len(processed_pcm) // BYTES_PER_SAMPLE
 
-        self._clear_input()
-
-        header = f"START {playback_rate} 1 16 {sample_count}\n".encode("ascii")
-        if self._verbose:
-            print(f"=> {header.decode().strip()}")
-        self._serial.write(header)
-        self._serial.flush()
-
-        bytes_per_second = playback_rate * BYTES_PER_SAMPLE
-        self._stream_bytes(processed_pcm, bytes_per_second)
-
-        if self._verbose:
-            print("=> END")
-        self._serial.write(b"END\n")
-        self._serial.flush()
-
-    def _stream_bytes(self, payload: bytes, bytes_per_second: int) -> None:
-        if bytes_per_second <= 0:
-            raise ValueError("bytes_per_second must be positive")
-        chunk_size = STREAM_CHUNK_BYTES
-        next_deadline = time.perf_counter()
-        for start in range(0, len(payload), chunk_size):
-            end = start + chunk_size
-            chunk = payload[start:end]
-            written = self._serial.write(chunk)
-            if written != len(chunk):  # pragma: no cover - serial guard
-                raise SerialTimeoutError(
-                    f"Short write while streaming WAV ({written}/{len(chunk)} bytes)"
-                )
-            self._serial.flush()
+        self._bridge.pause_capture()
+        try:
+            self._bridge.flush_input()
+            self._bridge.play_pcm(processed_pcm, sample_rate=playback_rate)
             if self._verbose:
-                sent = min(end, len(payload))
-                percent = min(100.0, (sent / len(payload)) * 100.0)
-                print(f"   streamed {sent}/{len(payload)} bytes ({percent:.1f}%)")
-            next_deadline += len(chunk) / bytes_per_second
-            sleep_time = next_deadline - time.perf_counter()
-            if sleep_time > 0:
-                time.sleep(sleep_time)
-            else:
-                next_deadline = time.perf_counter()
-        self._serial.flush()
+                print(f"   streamed {len(processed_pcm)}/{len(processed_pcm)} bytes (100.0%)")
+        finally:
+            self._bridge.resume_capture()
 
     @staticmethod
     def _load_wav(wav_path: Path) -> tuple[bytes, int, int]:
@@ -213,19 +143,6 @@ class EspAudioTester:
                 value = src_samples[left] + (src_samples[right] - src_samples[left]) * frac
             resampled[i] = int(round(value))
         return resampled.tobytes(), target_rate
-
-    def _wait_for_audio_header(self, timeout: float) -> str:
-        deadline = time.monotonic() + timeout
-        while True:
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                raise SerialTimeoutError("Timed out waiting for AUDIO header")
-            line = self.read_line(timeout=remaining)
-            if line.startswith("AUDIO "):
-                return line
-            # Ignore other log/state messages
-
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(

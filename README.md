@@ -1,17 +1,17 @@
 # Gradi Mediation
 
 ## Overview
-Gradi Mediation implements an end-to-end speech mediation loop. Audio is captured on an ESP32-S3 with an ICS-43434 microphone, gated on the desktop with WebRTC VAD, transcribed by either whisper.cpp or Faster-Whisper, refined through a vLLM prompt, and synthesised by Kokoro-FastAPI for playback on dual MAX98357A speakers. The desktop drives the state machine so that the microphone and speakers never contend.
+Gradi Mediation implements an end-to-end speech mediation loop. Audio is captured on an ESP32-S3 with an ICS-43434 microphone, gated on the desktop with WebRTC VAD, transcribed by whisper.cpp, Faster-Whisper, or Vosk, refined through a vLLM prompt, and synthesised by Kokoro-FastAPI for playback on dual MAX98357A speakers. The desktop drives the state machine so that the microphone and speakers never contend.
 
 ## Hardware & Services
 - ESP32-S3 + ICS-43434 mic + dual MAX98357A amplifiers, connected over USB CDC.
-- Desktop services: WebRTC VAD (Python), Whisper ASR (whisper.cpp or Faster-Whisper), vLLM text transformer, Kokoro-FastAPI TTS.
+- Desktop services: WebRTC VAD (Python), ASR engines (whisper.cpp, Faster-Whisper, or Vosk), vLLM text transformer, Kokoro-FastAPI TTS.
 - Optional GPU acceleration for Faster-Whisper when `--fw-device cuda` is selected.
 
 ## Repository Layout
 - `firmware/esp32s3_audio_min/` – minimal Arduino sketch that continuously streams mic PCM and plays queued audio, now signalling playback completion.
 - `desktop_vad/` – WebRTC VAD wrapper and configs for gating capture.
-- `asr/` – whisper.cpp and Faster-Whisper transcribers plus shared result types.
+- `asr/` – whisper.cpp, Faster-Whisper, and Vosk transcribers plus shared result types.
 - `llm/` – vLLM client utilities and prompt management.
 - `tts/` – Kokoro streaming client and helpers.
 - `controller/` – session controller, ESP bridge, and state machine logic.
@@ -26,9 +26,9 @@ Gradi Mediation implements an end-to-end speech mediation loop. Audio is capture
    ```
 2. Install Python dependencies inside the venv:
    ```bash
-   uv pip install pyserial webrtcvad requests soundfile faster-whisper
+   uv pip install pyserial webrtcvad requests soundfile faster-whisper vosk numpy
    ```
-   Add any extra libraries your platform needs (e.g., `numpy` for audio tooling).
+   Add any extra libraries your platform needs beyond this baseline.
 3. Populate `third_party/` following `third_party/README.md`:
    - Clone and build `whisper.cpp` (`make -j$(nproc)` or CMake) and download `ggml-small.bin`.
    - Download Faster-Whisper models into `third_party/faster-whisper/models/`.
@@ -41,6 +41,7 @@ Gradi Mediation implements an end-to-end speech mediation loop. Audio is capture
   uv run scripts/esp_audio_tester.py --port /dev/ttyACM0 record --seconds 5 --output esp_mic_test.wav
   uv run scripts/esp_audio_tester.py --port /dev/ttyACM0 play --input esp_mic_test.wav --target-rate 16000
   ```
+  The helper script now performs the `READY`/`RESUME` handshake automatically and reads binary audio frames (`AUD0` headers) from the ESP stream.
 - **Desktop VAD**
   ```bash
   uv run scripts/vad_test.py esp_mic_test.wav --aggressiveness 2
@@ -60,6 +61,12 @@ Gradi Mediation implements an end-to-end speech mediation loop. Audio is capture
     --asr-engine faster_whisper \
     --fw-model-dir third_party/faster-whisper/models \
     --fw-device cuda \
+    phrase01.wav --output asr_results.txt
+
+  # Vosk
+  uv run scripts/asr_transcribe.py \
+    --asr-engine vosk \
+    --vosk-model-dir third_party/vosk/models/vosk-model-small-en-us-0.15 \
     phrase01.wav --output asr_results.txt
   ```
 - **LLM transform (vLLM)**
@@ -84,6 +91,9 @@ uv run scripts/session_controller.py \
 # For whisper.cpp add:
 #   --whisper-binary third_party/whisper.cpp/build/bin/whisper-cli \
 #   --whisper-model third_party/whisper.cpp/models/ggml-small.bin
+# For Vosk add:
+#   --asr-engine vosk \
+#   --vosk-model-dir third_party/vosk/models/vosk-model-small-en-us-0.15
 ```
 The controller writes structured JSONL logs to `logs/sessions/` and ensures the ESP playback acknowledgement arrives before the mic resumes.
 
