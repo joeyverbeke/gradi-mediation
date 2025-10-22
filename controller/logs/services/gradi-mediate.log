@@ -1,0 +1,122 @@
+2025-10-22T12:44:56.877034+00:00 [gradi-mediate] INFO: Starting: uv run scripts/session_controller.py --port /dev/ttyACM0 --asr-engine faster_whisper --fw-model-dir third_party/faster-whisper/models --kokoro-voice af_bella
+2025-10-22T12:44:56.878771+00:00 [gradi-mediate] INFO: Process health probe configured; marking service ready.
+2025-10-22T12:44:56.884752+00:00 [gradi-mediate:stderr] error: Failed to spawn: `scripts/session_controller.py`
+2025-10-22T12:44:56.884789+00:00 [gradi-mediate:stderr]   Caused by: No such file or directory (os error 2)
+2025-10-22T12:44:56.885572+00:00 [gradi-mediate] INFO: Process exited with code 2
+2025-10-22T12:44:56.885815+00:00 [gradi-mediate] WARNING: Restarting in 0.9s (attempt 1)
+2025-10-22T12:44:57.790011+00:00 [gradi-mediate] INFO: Starting: uv run scripts/session_controller.py --port /dev/ttyACM0 --asr-engine faster_whisper --fw-model-dir third_party/faster-whisper/models --kokoro-voice af_bella
+2025-10-22T12:44:57.791741+00:00 [gradi-mediate] INFO: Process health probe configured; marking service ready.
+2025-10-22T12:44:57.797024+00:00 [gradi-mediate:stderr] error: Failed to spawn: `scripts/session_controller.py`
+2025-10-22T12:44:57.797065+00:00 [gradi-mediate:stderr]   Caused by: No such file or directory (os error 2)
+2025-10-22T12:44:57.797739+00:00 [gradi-mediate] INFO: Process exited with code 2
+2025-10-22T12:44:57.797958+00:00 [gradi-mediate] WARNING: Restarting in 1.9s (attempt 2)
+2025-10-22T12:44:59.719131+00:00 [gradi-mediate] INFO: Starting: uv run scripts/session_controller.py --port /dev/ttyACM0 --asr-engine faster_whisper --fw-model-dir third_party/faster-whisper/models --kokoro-voice af_bella
+2025-10-22T12:44:59.720632+00:00 [gradi-mediate] INFO: Process health probe configured; marking service ready.
+2025-10-22T12:44:59.728100+00:00 [gradi-mediate:stderr] error: Failed to spawn: `scripts/session_controller.py`
+2025-10-22T12:44:59.728141+00:00 [gradi-mediate:stderr]   Caused by: No such file or directory (os error 2)
+2025-10-22T12:44:59.728679+00:00 [gradi-mediate] INFO: Process exited with code 2
+2025-10-22T12:44:59.728893+00:00 [gradi-mediate] WARNING: Restarting in 4.2s (attempt 3)
+2025-10-22T12:45:03.955505+00:00 [gradi-mediate] INFO: Starting: uv run scripts/session_controller.py --port /dev/ttyACM0 --asr-engine faster_whisper --fw-model-dir third_party/faster-whisper/models --kokoro-voice af_bella
+2025-10-22T12:45:03.956822+00:00 [gradi-mediate] INFO: Process health probe configured; marking service ready.
+2025-10-22T12:45:03.962675+00:00 [gradi-mediate:stderr] error: Failed to spawn: `scripts/session_controller.py`
+2025-10-22T12:45:03.962713+00:00 [gradi-mediate:stderr]   Caused by: No such file or directory (os error 2)
+2025-10-22T12:45:03.963311+00:00 [gradi-mediate] INFO: Process exited with code 2
+2025-10-22T12:45:03.964392+00:00 [gradi-mediate] WARNING: Restarting in 6.6s (attempt 4)
+2025-10-22T12:45:10.574023+00:00 [gradi-mediate] INFO: Starting: uv run scripts/session_controller.py --port /dev/ttyACM0 --asr-engine faster_whisper --fw-model-dir third_party/faster-whisper/models --kokoro-voice af_bella
+2025-10-22T12:45:10.575426+00:00 [gradi-mediate] INFO: Process health probe configured; marking service ready.
+2025-10-22T12:45:10.579260+00:00 [gradi-mediate:stderr] error: Failed to spawn: `scripts/session_controller.py`
+2025-10-22T12:45:10.579302+00:00 [gradi-mediate:stderr]   Caused by: No such file or directory (os error 2)
+2025-10-22T12:45:10.579857+00:00 [gradi-mediate] INFO: Process exited with code 2
+2025-10-22T12:45:10.580089+00:00 [gradi-mediate] WARNING: Restarting in 18.1s (attempt 5)
+2025-10-22T12:48:15.773112+00:00 [gradi-mediate] INFO: Starting: uv run scripts/session_controller.py --port /dev/ttyACM0 --asr-engine faster_whisper --fw-model-dir third_party/faster-whisper/models --kokoro-voice af_bella
+2025-10-22T12:48:15.775037+00:00 [gradi-mediate] INFO: Process health probe configured; marking service ready.
+2025-10-22T12:48:16.336624+00:00 [gradi-mediate:stderr] /home/joey/k0j0/gradi/gradi/gradi-mediation/.venv/lib/python3.10/site-packages/webrtcvad.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-10-22T12:48:16.336703+00:00 [gradi-mediate:stderr]   import pkg_resources
+2025-10-22T12:48:21.390794+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:48:21.390453+00:00", "state": "Idle", "reason": "controller.start"}
+2025-10-22T12:48:21.489038+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:48:21.488758+00:00", "state": "CaptureRequested", "session": "c015c72e", "start_time": 0.0, "start_byte": 0}
+2025-10-22T12:48:21.632894+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:48:21.632673+00:00", "state": "ReturnToIdle", "session": "c015c72e", "reason": "segment.discarded", "cause": "segment.too_short", "duration": 0.09}
+2025-10-22T12:48:21.632947+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:48:21.632801+00:00", "state": "Idle", "session": "c015c72e", "reason": "cycle.discarded", "cycles": 0}
+2025-10-22T12:48:22.177011+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:48:22.176758+00:00", "state": "CaptureRequested", "session": "adc28bcd", "start_time": 0.63, "start_byte": 20160}
+2025-10-22T12:48:22.480262+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:48:22.480005+00:00", "state": "ASR", "session": "adc28bcd", "reason": "segment.complete", "duration": 0.30000000000000004}
+2025-10-22T12:48:24.166437+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:48:24.166170+00:00", "state": "ASR", "session": "adc28bcd", "reason": "complete", "latency_ms": 1686, "text_preview": "you"}
+2025-10-22T12:48:24.166511+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:48:24.166343+00:00", "state": "LLMTransform", "session": "adc28bcd", "reason": "start", "transcript_preview": "you"}
+2025-10-22T12:48:24.168687+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:48:24.168517+00:00", "state": "ErrorTimeout", "session": "adc28bcd", "stage": "pipeline", "error": "HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /v1/chat/completions (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x738a7f99da50>: Failed to establish a new connection: [Errno 111] Connection refused'))", "error_type": "ConnectionError"}
+2025-10-22T12:48:24.168783+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:48:24.168664+00:00", "state": "Idle", "session": "adc28bcd", "reason": "cycle.discarded", "cycles": 0}
+2025-10-22T12:48:25.269765+00:00 [gradi-mediate:stderr] 
+2025-10-22T12:48:25.269820+00:00 [gradi-mediate:stderr] Interrupted
+2025-10-22T12:48:25.275112+00:00 [gradi-mediate:stdout] Logs written to logs/sessions/session_20251022-214816.jsonl
+2025-10-22T12:48:25.735778+00:00 [gradi-mediate] INFO: Process exited with code 0
+2025-10-22T12:49:53.144466+00:00 [gradi-mediate] INFO: Starting: uv run scripts/session_controller.py --port /dev/ttyACM0 --asr-engine faster_whisper --fw-model-dir third_party/faster-whisper/models --kokoro-voice af_bella
+2025-10-22T12:49:53.146853+00:00 [gradi-mediate] INFO: Process health probe configured; marking service ready.
+2025-10-22T12:49:53.368887+00:00 [gradi-mediate:stderr] /home/joey/k0j0/gradi/gradi/gradi-mediation/.venv/lib/python3.10/site-packages/webrtcvad.py:1: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+2025-10-22T12:49:53.368949+00:00 [gradi-mediate:stderr]   import pkg_resources
+2025-10-22T12:49:58.392788+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:49:58.392484+00:00", "state": "Idle", "reason": "controller.start"}
+2025-10-22T12:49:59.497758+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:49:59.497508+00:00", "state": "CaptureRequested", "session": "7e2b15c2", "start_time": 0.0, "start_byte": 0}
+2025-10-22T12:49:59.641753+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:49:59.641460+00:00", "state": "ReturnToIdle", "session": "7e2b15c2", "reason": "segment.discarded", "cause": "segment.too_short", "duration": 0.09}
+2025-10-22T12:49:59.641829+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:49:59.641673+00:00", "state": "Idle", "session": "7e2b15c2", "reason": "cycle.discarded", "cycles": 0}
+2025-10-22T12:50:21.673303+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:21.672978+00:00", "state": "CaptureRequested", "session": "35b48f7b", "start_time": 22.11, "start_byte": 707520}
+2025-10-22T12:50:21.816482+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:21.816243+00:00", "state": "ReturnToIdle", "session": "35b48f7b", "reason": "segment.discarded", "cause": "segment.too_short", "duration": 0.15000000000000213}
+2025-10-22T12:50:21.816550+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:21.816401+00:00", "state": "Idle", "session": "35b48f7b", "reason": "cycle.discarded", "cycles": 0}
+2025-10-22T12:50:28.681109+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:28.680792+00:00", "state": "CaptureRequested", "session": "4df5a3e9", "start_time": 29.13, "start_byte": 932160}
+2025-10-22T12:50:29.081289+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:29.081017+00:00", "state": "ASR", "session": "4df5a3e9", "reason": "segment.complete", "duration": 0.39000000000000057}
+2025-10-22T12:50:30.645263+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:30.644977+00:00", "state": "ASR", "session": "4df5a3e9", "reason": "complete", "latency_ms": 1563, "text_preview": ""}
+2025-10-22T12:50:30.645320+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:30.645160+00:00", "state": "ReturnToIdle", "session": "4df5a3e9", "reason": "segment.discarded", "cause": "blank_transcript"}
+2025-10-22T12:50:30.645589+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:30.645297+00:00", "state": "Idle", "session": "4df5a3e9", "reason": "cycle.discarded", "cycles": 0}
+2025-10-22T12:50:36.040912+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:36.040635+00:00", "state": "CaptureRequested", "session": "2bee4acf", "start_time": 32.879999999999995, "start_byte": 1052160}
+2025-10-22T12:50:36.184862+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:36.184606+00:00", "state": "ReturnToIdle", "session": "2bee4acf", "reason": "segment.discarded", "cause": "segment.too_short", "duration": 0.14999999999999858}
+2025-10-22T12:50:36.184931+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:36.184780+00:00", "state": "Idle", "session": "2bee4acf", "reason": "cycle.discarded", "cycles": 0}
+2025-10-22T12:50:36.904276+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:36.903957+00:00", "state": "CaptureRequested", "session": "583f7528", "start_time": 33.75, "start_byte": 1080000}
+2025-10-22T12:50:37.721318+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:37.721049+00:00", "state": "ASR", "session": "583f7528", "reason": "segment.complete", "duration": 0.8100000000000023}
+2025-10-22T12:50:37.903463+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:37.903207+00:00", "state": "ASR", "session": "583f7528", "reason": "complete", "latency_ms": 182, "text_preview": "No."}
+2025-10-22T12:50:37.903514+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:37.903368+00:00", "state": "LLMTransform", "session": "583f7528", "reason": "start", "transcript_preview": "No."}
+2025-10-22T12:50:40.131408+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:40.131219+00:00", "state": "LLMTransform", "session": "583f7528", "reason": "complete", "latency_ms": 2227, "output_preview": "No."}
+2025-10-22T12:50:40.131477+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:40.131393+00:00", "state": "TTSSynthesis", "session": "583f7528", "reason": "start", "text_preview": "No."}
+2025-10-22T12:50:41.277363+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:41.277151+00:00", "state": "TTSSynthesis", "session": "583f7528", "reason": "complete", "latency_ms": 1145, "first_chunk_ms": 1145}
+2025-10-22T12:50:41.281420+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:41.281314+00:00", "state": "Playback", "session": "583f7528", "reason": "start", "sample_rate": 16000, "bytes": 24836}
+2025-10-22T12:50:42.059511+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:42.059227+00:00", "state": "Playback", "session": "583f7528", "reason": "complete", "duration_ms": 777}
+2025-10-22T12:50:42.059585+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:42.059419+00:00", "state": "ReturnToIdle", "session": "583f7528", "reason": "playback.complete", "playback": {"tts_first_chunk_ms": 1145, "tts_elapsed_ms": 1145, "playback_ms": 777, "pcm_bytes": 24836, "sample_rate": 16000}}
+2025-10-22T12:50:42.059650+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:42.059476+00:00", "state": "Idle", "session": "583f7528", "reason": "cycle.complete", "cycles": 1}
+2025-10-22T12:50:43.469799+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:43.469524+00:00", "state": "CaptureRequested", "session": "0901a805", "start_time": 0.51, "start_byte": 16320}
+2025-10-22T12:50:43.613738+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:43.613498+00:00", "state": "ReturnToIdle", "session": "0901a805", "reason": "segment.discarded", "cause": "segment.too_short", "duration": 0.15000000000000002}
+2025-10-22T12:50:43.613814+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:43.613683+00:00", "state": "Idle", "session": "0901a805", "reason": "cycle.discarded", "cycles": 1}
+2025-10-22T12:50:43.917774+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:43.917500+00:00", "state": "CaptureRequested", "session": "49f9424c", "start_time": 0.96, "start_byte": 30720}
+2025-10-22T12:50:44.942275+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:44.942005+00:00", "state": "ASR", "session": "49f9424c", "reason": "segment.complete", "duration": 1.02}
+2025-10-22T12:50:45.423162+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:45.422902+00:00", "state": "ASR", "session": "49f9424c", "reason": "complete", "latency_ms": 480, "text_preview": "Hello, did you work?"}
+2025-10-22T12:50:45.423235+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:45.423071+00:00", "state": "LLMTransform", "session": "49f9424c", "reason": "start", "transcript_preview": "Hello, did you work?"}
+2025-10-22T12:50:46.463200+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:46.463013+00:00", "state": "LLMTransform", "session": "49f9424c", "reason": "complete", "latency_ms": 1039, "output_preview": "Hello, did you work?"}
+2025-10-22T12:50:46.463279+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:46.463197+00:00", "state": "TTSSynthesis", "session": "49f9424c", "reason": "start", "text_preview": "Hello, did you work?"}
+2025-10-22T12:50:47.548520+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:47.548352+00:00", "state": "TTSSynthesis", "session": "49f9424c", "reason": "complete", "latency_ms": 1085, "first_chunk_ms": 1083}
+2025-10-22T12:50:47.554712+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:47.554552+00:00", "state": "Playback", "session": "49f9424c", "reason": "start", "sample_rate": 16000, "bytes": 42320}
+2025-10-22T12:50:48.879449+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:48.879154+00:00", "state": "Playback", "session": "49f9424c", "reason": "complete", "duration_ms": 1324}
+2025-10-22T12:50:48.879521+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:48.879356+00:00", "state": "ReturnToIdle", "session": "49f9424c", "reason": "playback.complete", "playback": {"tts_first_chunk_ms": 1083, "tts_elapsed_ms": 1083, "playback_ms": 1324, "pcm_bytes": 42320, "sample_rate": 16000}}
+2025-10-22T12:50:48.879620+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:48.879415+00:00", "state": "Idle", "session": "49f9424c", "reason": "cycle.complete", "cycles": 2}
+2025-10-22T12:50:49.720610+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:49.720334+00:00", "state": "CaptureRequested", "session": "fe325366", "start_time": 0.0, "start_byte": 0}
+2025-10-22T12:50:50.856452+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:50.856146+00:00", "state": "ASR", "session": "fe325366", "reason": "segment.complete", "duration": 1.08}
+2025-10-22T12:50:51.078855+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:51.078596+00:00", "state": "ASR", "session": "fe325366", "reason": "complete", "latency_ms": 222, "text_preview": "Crazy"}
+2025-10-22T12:50:51.078905+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:51.078762+00:00", "state": "LLMTransform", "session": "fe325366", "reason": "start", "transcript_preview": "Crazy"}
+2025-10-22T12:50:52.129029+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:52.128812+00:00", "state": "LLMTransform", "session": "fe325366", "reason": "complete", "latency_ms": 1050, "output_preview": "[NO_SPEECH]"}
+2025-10-22T12:50:52.129098+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:52.129032+00:00", "state": "ReturnToIdle", "session": "fe325366", "reason": "segment.discarded", "cause": "llm_diagnostic", "llm_preview": "[NO_SPEECH]"}
+2025-10-22T12:50:52.129237+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:52.129131+00:00", "state": "Idle", "session": "fe325366", "reason": "cycle.discarded", "cycles": 2}
+2025-10-22T12:50:54.680561+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:54.680253+00:00", "state": "CaptureRequested", "session": "1ce9b577", "start_time": 3.48, "start_byte": 111360}
+2025-10-22T12:50:56.073182+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:56.072920+00:00", "state": "ASR", "session": "1ce9b577", "reason": "segment.complete", "duration": 1.3800000000000003}
+2025-10-22T12:50:56.229857+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:56.229598+00:00", "state": "ASR", "session": "1ce9b577", "reason": "complete", "latency_ms": 156, "text_preview": "Crazy, you're working."}
+2025-10-22T12:50:56.229906+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:56.229767+00:00", "state": "LLMTransform", "session": "1ce9b577", "reason": "start", "transcript_preview": "Crazy, you're working."}
+2025-10-22T12:50:57.285188+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:57.284944+00:00", "state": "LLMTransform", "session": "1ce9b577", "reason": "complete", "latency_ms": 1055, "output_preview": "You're working."}
+2025-10-22T12:50:57.285308+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:57.285138+00:00", "state": "TTSSynthesis", "session": "1ce9b577", "reason": "start", "text_preview": "You're working."}
+2025-10-22T12:50:58.317212+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:58.316981+00:00", "state": "TTSSynthesis", "session": "1ce9b577", "reason": "complete", "latency_ms": 1031, "first_chunk_ms": 1030}
+2025-10-22T12:50:58.321955+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:58.321855+00:00", "state": "Playback", "session": "1ce9b577", "reason": "start", "sample_rate": 16000, "bytes": 33298}
+2025-10-22T12:50:59.364687+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:59.364399+00:00", "state": "Playback", "session": "1ce9b577", "reason": "complete", "duration_ms": 1042}
+2025-10-22T12:50:59.364760+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:59.364596+00:00", "state": "ReturnToIdle", "session": "1ce9b577", "reason": "playback.complete", "playback": {"tts_first_chunk_ms": 1030, "tts_elapsed_ms": 1030, "playback_ms": 1042, "pcm_bytes": 33298, "sample_rate": 16000}}
+2025-10-22T12:50:59.364842+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:50:59.364660+00:00", "state": "Idle", "session": "1ce9b577", "reason": "cycle.complete", "cycles": 3}
+2025-10-22T12:51:00.925348+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:51:00.925083+00:00", "state": "CaptureRequested", "session": "86944283", "start_time": 0.6599999999999999, "start_byte": 21120}
+2025-10-22T12:51:01.069343+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:51:01.069070+00:00", "state": "ReturnToIdle", "session": "86944283", "reason": "segment.discarded", "cause": "segment.too_short", "duration": 0.15000000000000002}
+2025-10-22T12:51:01.069414+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:51:01.069254+00:00", "state": "Idle", "session": "86944283", "reason": "cycle.discarded", "cycles": 3}
+2025-10-22T12:51:01.773324+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:51:01.773039+00:00", "state": "CaptureRequested", "session": "eb152422", "start_time": 1.5, "start_byte": 48000}
+2025-10-22T12:51:02.253550+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:51:02.253284+00:00", "state": "ASR", "session": "eb152422", "reason": "segment.complete", "duration": 0.48}
+2025-10-22T12:51:02.422829+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:51:02.422568+00:00", "state": "ASR", "session": "eb152422", "reason": "complete", "latency_ms": 169, "text_preview": ""}
+2025-10-22T12:51:02.422887+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:51:02.422727+00:00", "state": "ReturnToIdle", "session": "eb152422", "reason": "segment.discarded", "cause": "blank_transcript"}
+2025-10-22T12:51:02.422968+00:00 [gradi-mediate:stderr] {"ts": "2025-10-22T12:51:02.422815+00:00", "state": "Idle", "session": "eb152422", "reason": "cycle.discarded", "cycles": 3}
+2025-10-22T12:51:03.993184+00:00 [gradi-mediate:stderr] 
+2025-10-22T12:51:03.993252+00:00 [gradi-mediate:stderr] Interrupted
+2025-10-22T12:51:04.037320+00:00 [gradi-mediate:stdout] Logs written to logs/sessions/session_20251022-214953.jsonl
+2025-10-22T12:51:04.270172+00:00 [gradi-mediate] INFO: Process exited with code 0

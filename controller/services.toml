@@ -1,0 +1,102 @@
+# Supervisor defaults
+[supervisor]
+state_dir = "logs/services"
+log_dir = "logs/services"
+default_grace_period = 20.0
+
+# vLLM inference server
+[[services]]
+name = "vllm"
+cwd = "~/k0j0/gradi/0_server"
+venv = "~/k0j0/gradi/0_server/.venv"
+command = [
+  "uv",
+  "run",
+  "vllm",
+  "serve",
+  "hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4",
+  "--quantization",
+  "gptq_marlin",
+  "--dtype",
+  "half",
+  "--max-model-len",
+  "4096",
+  "--gpu-memory-utilization",
+  "0.82",
+  "--tensor-parallel-size",
+  "1",
+  "--enforce-eager",
+]
+
+  [services.health]
+  type = "http"
+  url = "http://127.0.0.1:8000/health"
+  fallback_urls = ["http://127.0.0.1:8000/docs"]
+  interval = 2.0
+  timeout = 5.0
+  expected_status = 200
+  startup_grace = 5.0
+
+  [services.restart]
+  initial_delay = 1.0
+  max_delay = 60.0
+  multiplier = 2.0
+  jitter = 0.2
+  reset_after = 300.0
+  max_restarts = 0
+
+# Kokoro-FastAPI TTS service
+[[services]]
+name = "kokoro"
+cwd = "~/k0j0/gradi/1_tts/Kokoro-FastAPI"
+venv = "~/k0j0/gradi/1_tts/.venv"
+command = ["./start-gpu.sh"]
+
+  [services.health]
+  type = "http"
+  url = "http://127.0.0.1:8880/health"
+  fallback_urls = ["http://127.0.0.1:8880/docs"]
+  interval = 2.0
+  timeout = 5.0
+  expected_status = 200
+  startup_grace = 5.0
+
+  [services.restart]
+  initial_delay = 1.0
+  max_delay = 30.0
+  multiplier = 2.0
+  jitter = 0.2
+  reset_after = 300.0
+  max_restarts = 0
+
+# Gradi Mediation controller loop
+[[services]]
+name = "gradi-mediate"
+cwd = ".."
+venv = "../.venv"
+command = [
+  "uv",
+  "run",
+  "scripts/session_controller.py",
+  "--port",
+  "/dev/ttyACM0",
+  "--asr-engine",
+  "faster_whisper",
+  "--fw-model-dir",
+  "third_party/faster-whisper/models",
+  "--kokoro-voice",
+  "af_bella",
+]
+
+  [services.health]
+  type = "process"
+  interval = 5.0
+  startup_grace = 5.0
+
+  [services.restart]
+  initial_delay = 1.0
+  max_delay = 30.0
+  multiplier = 2.0
+  jitter = 0.2
+  reset_after = 300.0
+  max_restarts = 0

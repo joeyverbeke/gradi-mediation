@@ -86,8 +86,8 @@ uv run scripts/session_controller.py \
   --asr-engine faster_whisper \
   --fw-model-dir third_party/faster-whisper/models \
   --kokoro-voice af_bella \
-  --kokoro-format pcm \
-  --max-cycles 5
+  --kokoro-format pcm
+  
 # For whisper.cpp add:
 #   --whisper-binary third_party/whisper.cpp/build/bin/whisper-cli \
 #   --whisper-model third_party/whisper.cpp/models/ggml-small.bin
@@ -96,6 +96,27 @@ uv run scripts/session_controller.py \
 #   --vosk-model-dir third_party/vosk/models/vosk-model-small-en-us-0.15
 ```
 The controller writes structured JSONL logs to `logs/sessions/` and ensures the ESP playback acknowledgement arrives before the mic resumes.
+
+## Service Supervisor
+- Configure launch parameters in `controller/services.toml` (paths, virtualenvs, CLI flags). Tilde and relative paths expand from the manifest location.
+- Start all dependencies plus `gradi-mediate` with one command:
+  ```bash
+  uv run controller/startup.py up --attach gradi-mediate
+  ```
+- Check status or stream logs without restarting:
+  ```bash
+  uv run controller/startup.py status
+  uv run controller/startup.py logs vllm --lines 80
+  ```
+- Gracefully tear everything down (`Ctrl+C` inside `up` performs the same flow):
+  ```bash
+  uv run controller/startup.py down
+  ```
+The supervisor maintains per-service logs in `logs/services/` and writes a consolidated state snapshot to `logs/services/supervisor_state.json`; the `down` command sends `SIGINT` to the running supervisor and waits for all subprocesses to exit before returning.
+- Python 3.10 environments need `tomli` for TOML parsing; install it once with:
+  ```bash
+  uv pip install tomli
+  ```
 
 ## Troubleshooting
 - Use `--verbose-esp` on `session_controller.py` to see raw serial protocol lines.

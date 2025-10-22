@@ -1,0 +1,346 @@
+2025-10-22T12:44:56.874430+00:00 [vllm] INFO: Starting: uv run vllm serve hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4 --quantization gptq_marlin --dtype half --max-model-len 4096 --gpu-memory-utilization 0.82 --tensor-parallel-size 1 --enforce-eager
+2025-10-22T12:45:01.871735+00:00 [vllm:stdout] INFO 10-22 21:45:01 [__init__.py:216] Automatically detected platform cuda.
+2025-10-22T12:45:01.905427+00:00 [vllm] WARNING: Health probe failed (1 attempts, elapsed 5.0s)
+2025-10-22T12:45:03.907771+00:00 [vllm] WARNING: Health probe failed (2 attempts, elapsed 7.0s)
+2025-10-22T12:45:04.092290+00:00 [vllm:stdout] [1;36m(APIServer pid=18746)[0;0m INFO 10-22 21:45:04 [api_server.py:1896] vLLM API server version 0.10.2
+2025-10-22T12:45:04.093712+00:00 [vllm:stdout] [1;36m(APIServer pid=18746)[0;0m INFO 10-22 21:45:04 [utils.py:328] non-default args: {'model_tag': 'hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4', 'model': 'hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4', 'dtype': 'half', 'max_model_len': 4096, 'quantization': 'gptq_marlin', 'enforce_eager': True, 'gpu_memory_utilization': 0.82}
+2025-10-22T12:45:05.911404+00:00 [vllm] WARNING: Health probe failed (3 attempts, elapsed 9.0s)
+2025-10-22T12:45:07.912863+00:00 [vllm] WARNING: Health probe failed (4 attempts, elapsed 11.0s)
+2025-10-22T12:45:09.914724+00:00 [vllm] WARNING: Health probe failed (5 attempts, elapsed 13.0s)
+2025-10-22T12:45:10.729371+00:00 [vllm:stdout] [1;36m(APIServer pid=18746)[0;0m INFO 10-22 21:45:10 [__init__.py:742] Resolved architecture: LlamaForCausalLM
+2025-10-22T12:45:10.729477+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m `torch_dtype` is deprecated! Use `dtype` instead!
+2025-10-22T12:45:10.729724+00:00 [vllm:stdout] [1;36m(APIServer pid=18746)[0;0m INFO 10-22 21:45:10 [__init__.py:1815] Using max model len 4096
+2025-10-22T12:45:10.821419+00:00 [vllm:stdout] [1;36m(APIServer pid=18746)[0;0m WARNING 10-22 21:45:10 [_ipex_ops.py:16] Import error msg: No module named 'intel_extension_for_pytorch'
+2025-10-22T12:45:10.827382+00:00 [vllm:stdout] [1;36m(APIServer pid=18746)[0;0m INFO 10-22 21:45:10 [gptq_marlin.py:173] The model is convertible to gptq_marlin during runtime. Using gptq_marlin kernel.
+2025-10-22T12:45:11.497539+00:00 [vllm:stdout] [1;36m(APIServer pid=18746)[0;0m INFO 10-22 21:45:11 [scheduler.py:222] Chunked prefill is enabled with max_num_batched_tokens=2048.
+2025-10-22T12:45:11.515340+00:00 [vllm:stdout] [1;36m(APIServer pid=18746)[0;0m INFO 10-22 21:45:11 [__init__.py:3400] Cudagraph is disabled under eager mode
+2025-10-22T12:45:11.916851+00:00 [vllm] WARNING: Health probe failed (6 attempts, elapsed 15.0s)
+2025-10-22T12:45:13.922416+00:00 [vllm] WARNING: Health probe failed (7 attempts, elapsed 17.0s)
+2025-10-22T12:45:14.854812+00:00 [vllm:stdout] INFO 10-22 21:45:14 [__init__.py:216] Automatically detected platform cuda.
+2025-10-22T12:45:15.926412+00:00 [vllm] WARNING: Health probe failed (8 attempts, elapsed 19.0s)
+2025-10-22T12:45:16.463348+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m INFO 10-22 21:45:16 [core.py:654] Waiting for init message from front-end.
+2025-10-22T12:45:16.469137+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m INFO 10-22 21:45:16 [core.py:76] Initializing a V1 LLM engine (v0.10.2) with config: model='hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4', speculative_config=None, tokenizer='hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.float16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, disable_custom_all_reduce=False, quantization=gptq_marlin, enforce_eager=True, kv_cache_dtype=auto, device_config=cuda, decoding_config=DecodingConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_backend=''), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None), seed=0, served_model_name=hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4, enable_prefix_caching=True, chunked_prefill_enabled=True, use_async_output_proc=True, pooler_config=None, compilation_config={"level":0,"debug_dump_path":"","cache_dir":"","backend":"","custom_ops":[],"splitting_ops":null,"use_inductor":true,"compile_sizes":[],"inductor_compile_config":{"enable_auto_functionalized_v2":false},"inductor_passes":{},"cudagraph_mode":0,"use_cudagraph":true,"cudagraph_num_of_warmups":0,"cudagraph_capture_sizes":[],"cudagraph_copy_inputs":false,"full_cuda_graph":false,"pass_config":{},"max_capture_size":0,"local_cache_dir":null}
+2025-10-22T12:45:16.512108+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m WARNING 10-22 21:45:16 [interface.py:391] Using 'pin_memory=False' as WSL is detected. This may slow down the performance.
+2025-10-22T12:45:17.317662+00:00 [vllm:stderr] [W1022 21:45:17.181338856 ProcessGroupNCCL.cpp:981] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+2025-10-22T12:45:17.320216+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:45:17.323765+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:45:17.324655+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:45:17.326219+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:45:17.327271+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:45:17.328339+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:45:17.328627+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m INFO 10-22 21:45:17 [parallel_state.py:1165] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0, EP rank 0
+2025-10-22T12:45:17.333344+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m WARNING 10-22 21:45:17 [topk_topp_sampler.py:69] FlashInfer is not available. Falling back to the PyTorch-native implementation of top-p & top-k sampling. For the best performance, please install FlashInfer.
+2025-10-22T12:45:17.347210+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m INFO 10-22 21:45:17 [gpu_model_runner.py:2338] Starting to load model hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4...
+2025-10-22T12:45:17.554718+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m INFO 10-22 21:45:17 [gpu_model_runner.py:2370] Loading model from scratch...
+2025-10-22T12:45:17.562532+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m INFO 10-22 21:45:17 [gptq_marlin.py:269] Using MarlinLinearKernel for GPTQMarlinLinearMethod
+2025-10-22T12:45:17.758555+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m INFO 10-22 21:45:17 [cuda.py:362] Using Flash Attention backend on V1 engine.
+2025-10-22T12:45:17.928816+00:00 [vllm] WARNING: Health probe failed (9 attempts, elapsed 21.1s)
+2025-10-22T12:45:18.358021+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m INFO 10-22 21:45:18 [weight_utils.py:348] Using model weights format ['*.safetensors']
+2025-10-22T12:45:18.807475+00:00 [vllm:stderr] [1;36m(EngineCore_DP0 pid=18865)[0;0m Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+2025-10-22T12:45:19.449630+00:00 [vllm:stderr] [1;36m(EngineCore_DP0 pid=18865)[0;0m Loading safetensors checkpoint shards:  50% Completed | 1/2 [00:00<00:00,  1.56it/s]
+2025-10-22T12:45:19.931429+00:00 [vllm] WARNING: Health probe failed (10 attempts, elapsed 23.1s)
+2025-10-22T12:45:21.935247+00:00 [vllm] WARNING: Health probe failed (11 attempts, elapsed 25.1s)
+2025-10-22T12:45:23.194523+00:00 [vllm:stderr] [1;36m(EngineCore_DP0 pid=18865)[0;0m Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:04<00:00,  2.47s/it]
+2025-10-22T12:45:23.194606+00:00 [vllm:stderr] [1;36m(EngineCore_DP0 pid=18865)[0;0m Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:04<00:00,  2.19s/it]
+2025-10-22T12:45:23.194638+00:00 [vllm:stderr] [1;36m(EngineCore_DP0 pid=18865)[0;0m 
+2025-10-22T12:45:23.247753+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m INFO 10-22 21:45:23 [default_loader.py:268] Loading weights took 4.44 seconds
+2025-10-22T12:45:23.792030+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=18865)[0;0m INFO 10-22 21:45:23 [gpu_model_runner.py:2392] Model loading took 5.3542 GiB and 5.845552 seconds
+2025-10-22T12:45:23.938259+00:00 [vllm] WARNING: Health probe failed (12 attempts, elapsed 27.1s)
+2025-10-22T12:45:25.058068+00:00 [vllm] INFO: Sending SIGINT for shutdown (supervisor shutdown)
+2025-10-22T12:45:25.604051+00:00 [vllm:stderr] [rank0]:[W1022 21:45:25.467640069 ProcessGroupNCCL.cpp:1538] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+2025-10-22T12:45:26.214892+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m Traceback (most recent call last):
+2025-10-22T12:45:26.214954+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/bin/vllm", line 10, in <module>
+2025-10-22T12:45:26.215007+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     sys.exit(main())
+2025-10-22T12:45:26.215014+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m              ^^^^^^
+2025-10-22T12:45:26.215018+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/cli/main.py", line 54, in main
+2025-10-22T12:45:26.215536+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     args.dispatch_function(args)
+2025-10-22T12:45:26.215606+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/cli/serve.py", line 50, in cmd
+2025-10-22T12:45:26.215887+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     uvloop.run(run_server(args))
+2025-10-22T12:45:26.216010+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/uvloop/__init__.py", line 109, in run
+2025-10-22T12:45:26.216425+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     return __asyncio.run(
+2025-10-22T12:45:26.216459+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m            ^^^^^^^^^^^^^^
+2025-10-22T12:45:26.216488+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+2025-10-22T12:45:26.216760+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     return runner.run(main)
+2025-10-22T12:45:26.216812+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m            ^^^^^^^^^^^^^^^^
+2025-10-22T12:45:26.216845+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+2025-10-22T12:45:26.216910+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     return self._loop.run_until_complete(task)
+2025-10-22T12:45:26.216948+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:45:26.216979+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+2025-10-22T12:45:26.217043+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/uvloop/__init__.py", line 61, in wrapper
+2025-10-22T12:45:26.217134+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     return await main
+2025-10-22T12:45:26.217175+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m            ^^^^^^^^^^
+2025-10-22T12:45:26.217229+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 1941, in run_server
+2025-10-22T12:45:26.217754+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     await run_server_worker(listen_address, sock, args, **uvicorn_kwargs)
+2025-10-22T12:45:26.217802+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 1961, in run_server_worker
+2025-10-22T12:45:26.217977+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     async with build_async_engine_client(
+2025-10-22T12:45:26.218012+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+2025-10-22T12:45:26.218304+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     return await anext(self.gen)
+2025-10-22T12:45:26.218339+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m            ^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:45:26.218397+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 179, in build_async_engine_client
+2025-10-22T12:45:26.218460+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     async with build_async_engine_client_from_engine_args(
+2025-10-22T12:45:26.218495+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+2025-10-22T12:45:26.218528+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     return await anext(self.gen)
+2025-10-22T12:45:26.218557+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m            ^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:45:26.218594+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 221, in build_async_engine_client_from_engine_args
+2025-10-22T12:45:26.218608+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     async_llm = AsyncLLM.from_vllm_config(
+2025-10-22T12:45:26.218634+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:45:26.218646+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/utils/__init__.py", line 1589, in inner
+2025-10-22T12:45:26.218707+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     return fn(*args, **kwargs)
+2025-10-22T12:45:26.218742+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m            ^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:45:26.218776+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py", line 212, in from_vllm_config
+2025-10-22T12:45:26.218855+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     return cls(
+2025-10-22T12:45:26.218887+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m            ^^^^
+2025-10-22T12:45:26.218923+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py", line 136, in __init__
+2025-10-22T12:45:26.218983+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     self.engine_core = EngineCoreClient.make_async_mp_client(
+2025-10-22T12:45:26.219015+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:45:26.219050+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 102, in make_async_mp_client
+2025-10-22T12:45:26.219284+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     return AsyncMPClient(*client_args)
+2025-10-22T12:45:26.219336+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:45:26.219393+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 769, in __init__
+2025-10-22T12:45:26.219539+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     super().__init__(
+2025-10-22T12:45:26.219573+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 448, in __init__
+2025-10-22T12:45:26.219631+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     with launch_core_engines(vllm_config, executor_class,
+2025-10-22T12:45:26.219662+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/usr/lib/python3.12/contextlib.py", line 144, in __exit__
+2025-10-22T12:45:26.219695+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     next(self.gen)
+2025-10-22T12:45:26.219754+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 729, in launch_core_engines
+2025-10-22T12:45:26.220201+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     wait_for_engine_startup(
+2025-10-22T12:45:26.220233+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 782, in wait_for_engine_startup
+2025-10-22T12:45:26.220295+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m     raise RuntimeError("Engine core initialization failed. "
+2025-10-22T12:45:26.220326+00:00 [vllm:stderr] [1;36m(APIServer pid=18746)[0;0m RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+2025-10-22T12:45:27.293844+00:00 [vllm] INFO: Process exited with code 1
+2025-10-22T12:48:15.770790+00:00 [vllm] INFO: Starting: uv run vllm serve hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4 --quantization gptq_marlin --dtype half --max-model-len 4096 --gpu-memory-utilization 0.82 --tensor-parallel-size 1 --enforce-eager
+2025-10-22T12:48:20.571558+00:00 [vllm:stdout] INFO 10-22 21:48:20 [__init__.py:216] Automatically detected platform cuda.
+2025-10-22T12:48:20.784780+00:00 [vllm] WARNING: Health probe failed (1 attempts, elapsed 5.0s)
+2025-10-22T12:48:22.787066+00:00 [vllm] WARNING: Health probe failed (2 attempts, elapsed 7.0s)
+2025-10-22T12:48:22.869788+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m INFO 10-22 21:48:22 [api_server.py:1896] vLLM API server version 0.10.2
+2025-10-22T12:48:22.871268+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m INFO 10-22 21:48:22 [utils.py:328] non-default args: {'model_tag': 'hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4', 'model': 'hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4', 'dtype': 'half', 'max_model_len': 4096, 'quantization': 'gptq_marlin', 'enforce_eager': True, 'gpu_memory_utilization': 0.82}
+2025-10-22T12:48:24.789628+00:00 [vllm] WARNING: Health probe failed (3 attempts, elapsed 9.0s)
+2025-10-22T12:48:25.269959+00:00 [vllm] INFO: Sending SIGINT for shutdown (supervisor shutdown)
+2025-10-22T12:48:25.523280+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] Error in inspecting model architecture 'LlamaForCausalLM'
+2025-10-22T12:48:25.523347+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] Traceback (most recent call last):
+2025-10-22T12:48:25.523405+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 867, in _run_in_subprocess
+2025-10-22T12:48:25.523469+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     returned.check_returncode()
+2025-10-22T12:48:25.523504+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/usr/lib/python3.12/subprocess.py", line 502, in check_returncode
+2025-10-22T12:48:25.523538+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     raise CalledProcessError(self.returncode, self.args, self.stdout,
+2025-10-22T12:48:25.523571+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] subprocess.CalledProcessError: Command '['/home/joey/k0j0/gradi/0_server/.venv/bin/python3', '-m', 'vllm.model_executor.models.registry']' died with <Signals.SIGINT: 2>.
+2025-10-22T12:48:25.523608+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] 
+2025-10-22T12:48:25.523619+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] The above exception was the direct cause of the following exception:
+2025-10-22T12:48:25.523631+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] 
+2025-10-22T12:48:25.523649+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] Traceback (most recent call last):
+2025-10-22T12:48:25.523663+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 447, in _try_inspect_model_cls
+2025-10-22T12:48:25.523723+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     return model.inspect_model_cls()
+2025-10-22T12:48:25.523763+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]            ^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.523821+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 418, in inspect_model_cls
+2025-10-22T12:48:25.523861+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     return _run_in_subprocess(
+2025-10-22T12:48:25.523914+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]            ^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.523948+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/model_executor/models/registry.py", line 870, in _run_in_subprocess
+2025-10-22T12:48:25.523988+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     raise RuntimeError(f"Error raised in subprocess:\n"
+2025-10-22T12:48:25.524034+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] RuntimeError: Error raised in subprocess:
+2025-10-22T12:48:25.524092+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] Traceback (most recent call last):
+2025-10-22T12:48:25.524133+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "<frozen runpy>", line 189, in _run_module_as_main
+2025-10-22T12:48:25.524210+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "<frozen runpy>", line 112, in _get_module_details
+2025-10-22T12:48:25.524270+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/__init__.py", line 14, in <module>
+2025-10-22T12:48:25.524343+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     import vllm.env_override  # noqa: F401
+2025-10-22T12:48:25.524387+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     ^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.524448+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/env_override.py", line 23, in <module>
+2025-10-22T12:48:25.524490+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     torch._inductor.config.compile_threads = 1
+2025-10-22T12:48:25.524544+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     ^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.524586+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/__init__.py", line 2743, in __getattr__
+2025-10-22T12:48:25.524646+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     return importlib.import_module(f".{name}", __name__)
+2025-10-22T12:48:25.524686+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.524742+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+2025-10-22T12:48:25.524806+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     return _bootstrap._gcd_import(name[level:], package, level)
+2025-10-22T12:48:25.524862+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.524904+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/_inductor/__init__.py", line 12, in <module>
+2025-10-22T12:48:25.524964+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     from .standalone_compile import CompiledArtifact  # noqa: TC001
+2025-10-22T12:48:25.525006+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.525029+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/_inductor/standalone_compile.py", line 12, in <module>
+2025-10-22T12:48:25.525061+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     from torch._dynamo.utils import dynamo_timed
+2025-10-22T12:48:25.525093+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/_dynamo/__init__.py", line 13, in <module>
+2025-10-22T12:48:25.525147+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     from . import config, convert_frame, eval_frame, resume_execution
+2025-10-22T12:48:25.525189+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/_dynamo/convert_frame.py", line 53, in <module>
+2025-10-22T12:48:25.525256+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     from torch._dynamo.symbolic_convert import TensorifyState
+2025-10-22T12:48:25.525314+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/_dynamo/symbolic_convert.py", line 52, in <module>
+2025-10-22T12:48:25.525353+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     from torch._dynamo.exc import TensorifyScalarRestartAnalysis
+2025-10-22T12:48:25.525407+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/_dynamo/exc.py", line 41, in <module>
+2025-10-22T12:48:25.525446+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     from .utils import counters
+2025-10-22T12:48:25.525500+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/_dynamo/utils.py", line 69, in <module>
+2025-10-22T12:48:25.525558+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     import torch.fx.experimental.symbolic_shapes
+2025-10-22T12:48:25.525599+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/fx/experimental/symbolic_shapes.py", line 75, in <module>
+2025-10-22T12:48:25.525658+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     from torch.utils._sympy.functions import (
+2025-10-22T12:48:25.525694+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/utils/_sympy/functions.py", line 1359, in <module>
+2025-10-22T12:48:25.525744+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     OpaqueUnaryFn_cosh = make_opaque_unary_fn("cosh")
+2025-10-22T12:48:25.525786+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.525847+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/torch/utils/_sympy/functions.py", line 1311, in make_opaque_unary_fn
+2025-10-22T12:48:25.525887+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     class OpaqueUnaryFn(sympy.Function):
+2025-10-22T12:48:25.525927+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/sympy/core/basic.py", line 218, in __init_subclass__
+2025-10-22T12:48:25.525981+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     _prepare_class_assumptions(cls)
+2025-10-22T12:48:25.526020+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/sympy/core/assumptions.py", line 642, in _prepare_class_assumptions
+2025-10-22T12:48:25.526077+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]     eval_is_meth = getattr(cls, '_eval_is_%s' % k, None)
+2025-10-22T12:48:25.526111+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449]                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.526165+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] KeyboardInterrupt
+2025-10-22T12:48:25.526202+00:00 [vllm:stdout] [1;36m(APIServer pid=19057)[0;0m ERROR 10-22 21:48:25 [registry.py:449] 
+2025-10-22T12:48:25.526317+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m Traceback (most recent call last):
+2025-10-22T12:48:25.526350+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/bin/vllm", line 10, in <module>
+2025-10-22T12:48:25.526381+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     sys.exit(main())
+2025-10-22T12:48:25.526412+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m              ^^^^^^
+2025-10-22T12:48:25.526443+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/cli/main.py", line 54, in main
+2025-10-22T12:48:25.526478+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     args.dispatch_function(args)
+2025-10-22T12:48:25.526509+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/cli/serve.py", line 50, in cmd
+2025-10-22T12:48:25.526540+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     uvloop.run(run_server(args))
+2025-10-22T12:48:25.526573+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/uvloop/__init__.py", line 109, in run
+2025-10-22T12:48:25.526609+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     return __asyncio.run(
+2025-10-22T12:48:25.526642+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m            ^^^^^^^^^^^^^^
+2025-10-22T12:48:25.526681+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+2025-10-22T12:48:25.526717+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     return runner.run(main)
+2025-10-22T12:48:25.526754+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m            ^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.526789+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+2025-10-22T12:48:25.526825+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     return self._loop.run_until_complete(task)
+2025-10-22T12:48:25.526872+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.526911+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+2025-10-22T12:48:25.526953+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/uvloop/__init__.py", line 61, in wrapper
+2025-10-22T12:48:25.526987+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     return await main
+2025-10-22T12:48:25.527020+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m            ^^^^^^^^^^
+2025-10-22T12:48:25.527054+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 1941, in run_server
+2025-10-22T12:48:25.527088+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     await run_server_worker(listen_address, sock, args, **uvicorn_kwargs)
+2025-10-22T12:48:25.527123+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 1961, in run_server_worker
+2025-10-22T12:48:25.527213+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     async with build_async_engine_client(
+2025-10-22T12:48:25.527250+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+2025-10-22T12:48:25.527287+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     return await anext(self.gen)
+2025-10-22T12:48:25.527343+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m            ^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.527355+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 179, in build_async_engine_client
+2025-10-22T12:48:25.527360+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     async with build_async_engine_client_from_engine_args(
+2025-10-22T12:48:25.527364+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+2025-10-22T12:48:25.527368+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     return await anext(self.gen)
+2025-10-22T12:48:25.527372+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m            ^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.527375+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 205, in build_async_engine_client_from_engine_args
+2025-10-22T12:48:25.527379+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     vllm_config = engine_args.create_engine_config(usage_context=usage_context)
+2025-10-22T12:48:25.527434+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.527471+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/engine/arg_utils.py", line 1119, in create_engine_config
+2025-10-22T12:48:25.527507+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     model_config = self.create_model_config()
+2025-10-22T12:48:25.527542+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-10-22T12:48:25.527603+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/vllm/engine/arg_utils.py", line 963, in create_model_config
+2025-10-22T12:48:25.527663+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     return ModelConfig(
+2025-10-22T12:48:25.527695+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m            ^^^^^^^^^^^^
+2025-10-22T12:48:25.527705+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   File "/home/joey/k0j0/gradi/0_server/.venv/lib/python3.12/site-packages/pydantic/_internal/_dataclasses.py", line 123, in __init__
+2025-10-22T12:48:25.527874+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     s.__pydantic_validator__.validate_python(ArgsKwargs(args, kwargs), self_instance=s)
+2025-10-22T12:48:25.527952+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m pydantic_core._pydantic_core.ValidationError: 1 validation error for ModelConfig
+2025-10-22T12:48:25.527988+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m   Value error, Model architectures ['LlamaForCausalLM'] failed to be inspected. Please check the logs for more details. [type=value_error, input_value=ArgsKwargs((), {'model': ...rocessor_plugin': None}), input_type=ArgsKwargs]
+2025-10-22T12:48:25.528025+00:00 [vllm:stderr] [1;36m(APIServer pid=19057)[0;0m     For further information visit https://errors.pydantic.dev/2.11/v/value_error
+2025-10-22T12:48:27.002658+00:00 [vllm] INFO: Process exited with code 1
+2025-10-22T12:49:53.142995+00:00 [vllm] INFO: Starting: uv run vllm serve hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4 --quantization gptq_marlin --dtype half --max-model-len 4096 --gpu-memory-utilization 0.82 --tensor-parallel-size 1 --enforce-eager
+2025-10-22T12:49:55.494542+00:00 [vllm:stdout] INFO 10-22 21:49:55 [__init__.py:216] Automatically detected platform cuda.
+2025-10-22T12:49:57.234774+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:49:57 [api_server.py:1896] vLLM API server version 0.10.2
+2025-10-22T12:49:57.236167+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:49:57 [utils.py:328] non-default args: {'model_tag': 'hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4', 'model': 'hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4', 'dtype': 'half', 'max_model_len': 4096, 'quantization': 'gptq_marlin', 'enforce_eager': True, 'gpu_memory_utilization': 0.82}
+2025-10-22T12:49:58.161464+00:00 [vllm] WARNING: Health probe failed (1 attempts, elapsed 5.0s)
+2025-10-22T12:50:00.163380+00:00 [vllm] WARNING: Health probe failed (2 attempts, elapsed 7.0s)
+2025-10-22T12:50:02.167182+00:00 [vllm] WARNING: Health probe failed (3 attempts, elapsed 9.0s)
+2025-10-22T12:50:03.317725+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:03 [__init__.py:742] Resolved architecture: LlamaForCausalLM
+2025-10-22T12:50:03.317801+00:00 [vllm:stderr] [1;36m(APIServer pid=19253)[0;0m `torch_dtype` is deprecated! Use `dtype` instead!
+2025-10-22T12:50:03.318022+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:03 [__init__.py:1815] Using max model len 4096
+2025-10-22T12:50:03.391424+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m WARNING 10-22 21:50:03 [_ipex_ops.py:16] Import error msg: No module named 'intel_extension_for_pytorch'
+2025-10-22T12:50:03.396240+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:03 [gptq_marlin.py:173] The model is convertible to gptq_marlin during runtime. Using gptq_marlin kernel.
+2025-10-22T12:50:03.995567+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:03 [scheduler.py:222] Chunked prefill is enabled with max_num_batched_tokens=2048.
+2025-10-22T12:50:04.011199+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:04 [__init__.py:3400] Cudagraph is disabled under eager mode
+2025-10-22T12:50:04.169360+00:00 [vllm] WARNING: Health probe failed (4 attempts, elapsed 11.0s)
+2025-10-22T12:50:06.172713+00:00 [vllm] WARNING: Health probe failed (5 attempts, elapsed 13.0s)
+2025-10-22T12:50:07.507822+00:00 [vllm:stdout] INFO 10-22 21:50:07 [__init__.py:216] Automatically detected platform cuda.
+2025-10-22T12:50:08.175342+00:00 [vllm] WARNING: Health probe failed (6 attempts, elapsed 15.0s)
+2025-10-22T12:50:09.040316+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:09 [core.py:654] Waiting for init message from front-end.
+2025-10-22T12:50:09.045690+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:09 [core.py:76] Initializing a V1 LLM engine (v0.10.2) with config: model='hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4', speculative_config=None, tokenizer='hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.float16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, disable_custom_all_reduce=False, quantization=gptq_marlin, enforce_eager=True, kv_cache_dtype=auto, device_config=cuda, decoding_config=DecodingConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_backend=''), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None), seed=0, served_model_name=hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4, enable_prefix_caching=True, chunked_prefill_enabled=True, use_async_output_proc=True, pooler_config=None, compilation_config={"level":0,"debug_dump_path":"","cache_dir":"","backend":"","custom_ops":[],"splitting_ops":null,"use_inductor":true,"compile_sizes":[],"inductor_compile_config":{"enable_auto_functionalized_v2":false},"inductor_passes":{},"cudagraph_mode":0,"use_cudagraph":true,"cudagraph_num_of_warmups":0,"cudagraph_capture_sizes":[],"cudagraph_copy_inputs":false,"full_cuda_graph":false,"pass_config":{},"max_capture_size":0,"local_cache_dir":null}
+2025-10-22T12:50:09.086354+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m WARNING 10-22 21:50:09 [interface.py:391] Using 'pin_memory=False' as WSL is detected. This may slow down the performance.
+2025-10-22T12:50:09.786251+00:00 [vllm:stderr] [W1022 21:50:09.649949129 ProcessGroupNCCL.cpp:981] Warning: TORCH_NCCL_AVOID_RECORD_STREAMS is the default now, this environment variable is thus deprecated. (function operator())
+2025-10-22T12:50:09.788036+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:50:09.791455+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:50:09.792346+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:50:09.793807+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:50:09.794761+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:50:09.795697+00:00 [vllm:stdout] [Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+2025-10-22T12:50:09.795969+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:09 [parallel_state.py:1165] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0, EP rank 0
+2025-10-22T12:50:09.800528+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m WARNING 10-22 21:50:09 [topk_topp_sampler.py:69] FlashInfer is not available. Falling back to the PyTorch-native implementation of top-p & top-k sampling. For the best performance, please install FlashInfer.
+2025-10-22T12:50:09.812851+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:09 [gpu_model_runner.py:2338] Starting to load model hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4...
+2025-10-22T12:50:10.008057+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:10 [gpu_model_runner.py:2370] Loading model from scratch...
+2025-10-22T12:50:10.015159+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:10 [gptq_marlin.py:269] Using MarlinLinearKernel for GPTQMarlinLinearMethod
+2025-10-22T12:50:10.177224+00:00 [vllm] WARNING: Health probe failed (7 attempts, elapsed 17.0s)
+2025-10-22T12:50:10.194943+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:10 [cuda.py:362] Using Flash Attention backend on V1 engine.
+2025-10-22T12:50:10.812917+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:10 [weight_utils.py:348] Using model weights format ['*.safetensors']
+2025-10-22T12:50:11.248499+00:00 [vllm:stderr] [1;36m(EngineCore_DP0 pid=19416)[0;0m Loading safetensors checkpoint shards:   0% Completed | 0/2 [00:00<?, ?it/s]
+2025-10-22T12:50:11.823242+00:00 [vllm:stderr] [1;36m(EngineCore_DP0 pid=19416)[0;0m Loading safetensors checkpoint shards:  50% Completed | 1/2 [00:00<00:00,  1.74it/s]
+2025-10-22T12:50:12.180519+00:00 [vllm] WARNING: Health probe failed (8 attempts, elapsed 19.0s)
+2025-10-22T12:50:14.184520+00:00 [vllm] WARNING: Health probe failed (9 attempts, elapsed 21.0s)
+2025-10-22T12:50:15.609438+00:00 [vllm:stderr] [1;36m(EngineCore_DP0 pid=19416)[0;0m Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:04<00:00,  2.46s/it]
+2025-10-22T12:50:15.609532+00:00 [vllm:stderr] [1;36m(EngineCore_DP0 pid=19416)[0;0m Loading safetensors checkpoint shards: 100% Completed | 2/2 [00:04<00:00,  2.18s/it]
+2025-10-22T12:50:15.609565+00:00 [vllm:stderr] [1;36m(EngineCore_DP0 pid=19416)[0;0m 
+2025-10-22T12:50:15.674397+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:15 [default_loader.py:268] Loading weights took 4.43 seconds
+2025-10-22T12:50:16.186959+00:00 [vllm] WARNING: Health probe failed (10 attempts, elapsed 23.0s)
+2025-10-22T12:50:16.250786+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:16 [gpu_model_runner.py:2392] Model loading took 5.3542 GiB and 5.834534 seconds
+2025-10-22T12:50:17.830829+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:17 [gpu_worker.py:298] Available KV cache memory: 3.23 GiB
+2025-10-22T12:50:18.028416+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:18 [kv_cache_utils.py:864] GPU KV cache size: 26,480 tokens
+2025-10-22T12:50:18.028487+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:18 [kv_cache_utils.py:868] Maximum concurrency for 4,096 tokens per request: 6.46x
+2025-10-22T12:50:18.059618+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:18 [gpu_worker.py:391] Free memory on device (10.65/11.94 GiB) on startup. Desired GPU memory utilization is (0.82, 9.79 GiB). Actual usage is 5.35 GiB for weight, 1.19 GiB for peak activation, 0.01 GiB for non-torch memory, and 0.0 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=3314908160` to fit into requested memory, or `--kv-cache-memory=4236835840` to fully utilize gpu memory. Current kv cache memory in use is 3472194560 bytes.
+2025-10-22T12:50:18.158737+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:18 [core.py:218] init engine (profile, create kv cache, warmup model) took 1.91 seconds
+2025-10-22T12:50:18.188569+00:00 [vllm] WARNING: Health probe failed (11 attempts, elapsed 25.0s)
+2025-10-22T12:50:19.172600+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m INFO 10-22 21:50:19 [__init__.py:3400] Cudagraph is disabled under eager mode
+2025-10-22T12:50:19.357284+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:19 [loggers.py:142] Engine 000: vllm cache_config_info with initialization after num_gpu_blocks is: 1655
+2025-10-22T12:50:19.357344+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:19 [async_llm.py:180] Torch profiler disabled. AsyncLLM CPU traces will not be collected.
+2025-10-22T12:50:19.392613+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:19 [api_server.py:1692] Supported_tasks: ['generate']
+2025-10-22T12:50:19.617167+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m WARNING 10-22 21:50:19 [__init__.py:1695] Default sampling parameters have been overridden by the model's Hugging Face generation config recommended from the model creator. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.
+2025-10-22T12:50:19.617226+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:19 [serving_responses.py:130] Using default chat sampling params from model: {'temperature': 0.6, 'top_p': 0.9}
+2025-10-22T12:50:19.829308+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:19 [serving_chat.py:137] Using default chat sampling params from model: {'temperature': 0.6, 'top_p': 0.9}
+2025-10-22T12:50:20.049982+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [serving_completion.py:76] Using default completion sampling params from model: {'temperature': 0.6, 'top_p': 0.9}
+2025-10-22T12:50:20.050037+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [api_server.py:1971] Starting vLLM API server 0 on http://0.0.0.0:8000
+2025-10-22T12:50:20.050103+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:36] Available routes are:
+2025-10-22T12:50:20.050137+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /openapi.json, Methods: GET, HEAD
+2025-10-22T12:50:20.050169+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /docs, Methods: GET, HEAD
+2025-10-22T12:50:20.050201+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /docs/oauth2-redirect, Methods: GET, HEAD
+2025-10-22T12:50:20.050235+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /redoc, Methods: GET, HEAD
+2025-10-22T12:50:20.050272+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /health, Methods: GET
+2025-10-22T12:50:20.050306+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /load, Methods: GET
+2025-10-22T12:50:20.050337+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /ping, Methods: POST
+2025-10-22T12:50:20.050373+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /ping, Methods: GET
+2025-10-22T12:50:20.050413+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /tokenize, Methods: POST
+2025-10-22T12:50:20.050452+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /detokenize, Methods: POST
+2025-10-22T12:50:20.050489+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/models, Methods: GET
+2025-10-22T12:50:20.050526+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /version, Methods: GET
+2025-10-22T12:50:20.050564+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/responses, Methods: POST
+2025-10-22T12:50:20.050632+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/responses/{response_id}, Methods: GET
+2025-10-22T12:50:20.050683+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/responses/{response_id}/cancel, Methods: POST
+2025-10-22T12:50:20.050718+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/chat/completions, Methods: POST
+2025-10-22T12:50:20.050788+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/completions, Methods: POST
+2025-10-22T12:50:20.050829+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/embeddings, Methods: POST
+2025-10-22T12:50:20.050868+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /pooling, Methods: POST
+2025-10-22T12:50:20.050907+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /classify, Methods: POST
+2025-10-22T12:50:20.050945+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /score, Methods: POST
+2025-10-22T12:50:20.050982+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/score, Methods: POST
+2025-10-22T12:50:20.051024+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/audio/transcriptions, Methods: POST
+2025-10-22T12:50:20.051059+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/audio/translations, Methods: POST
+2025-10-22T12:50:20.051093+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /rerank, Methods: POST
+2025-10-22T12:50:20.051132+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v1/rerank, Methods: POST
+2025-10-22T12:50:20.051163+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /v2/rerank, Methods: POST
+2025-10-22T12:50:20.051195+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /scale_elastic_ep, Methods: POST
+2025-10-22T12:50:20.051229+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /is_scaling_elastic_ep, Methods: POST
+2025-10-22T12:50:20.051264+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /invocations, Methods: POST
+2025-10-22T12:50:20.051299+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:20 [launcher.py:44] Route: /metrics, Methods: GET
+2025-10-22T12:50:20.080569+00:00 [vllm:stderr] [1;36m(APIServer pid=19253)[0;0m INFO:     Started server process [19253]
+2025-10-22T12:50:20.080609+00:00 [vllm:stderr] [1;36m(APIServer pid=19253)[0;0m INFO:     Waiting for application startup.
+2025-10-22T12:50:20.190754+00:00 [vllm] WARNING: Health probe failed (12 attempts, elapsed 27.0s)
+2025-10-22T12:50:20.288787+00:00 [vllm:stderr] [1;36m(APIServer pid=19253)[0;0m INFO:     Application startup complete.
+2025-10-22T12:50:22.194677+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO:     127.0.0.1:42964 - "GET /health HTTP/1.1" 200 OK
+2025-10-22T12:50:22.195079+00:00 [vllm] INFO: Health probe succeeded
+2025-10-22T12:50:39.875138+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:39 [chat_utils.py:538] Detected the chat template content format to be 'string'. You can set `--chat-template-content-format` to override this.
+2025-10-22T12:50:39.883820+00:00 [vllm:stdout] [1;36m(EngineCore_DP0 pid=19416)[0;0m WARNING 10-22 21:50:39 [cudagraph_dispatcher.py:102] cudagraph dispatching keys are not initialized. No cudagraph will be used.
+2025-10-22T12:50:40.130401+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO:     127.0.0.1:41606 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+2025-10-22T12:50:40.289556+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:40 [loggers.py:123] Engine 000: Avg prompt throughput: 14.1 tokens/s, Avg generation throughput: 0.3 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 0.0%
+2025-10-22T12:50:46.462435+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO:     127.0.0.1:47434 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+2025-10-22T12:50:50.290127+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:50:50 [loggers.py:123] Engine 000: Avg prompt throughput: 14.5 tokens/s, Avg generation throughput: 0.7 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 44.8%
+2025-10-22T12:50:52.128082+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO:     127.0.0.1:47434 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+2025-10-22T12:50:57.284434+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO:     127.0.0.1:47434 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+2025-10-22T12:51:00.289840+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:51:00 [loggers.py:123] Engine 000: Avg prompt throughput: 28.8 tokens/s, Avg generation throughput: 1.1 tokens/s, Running: 0 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.0%, Prefix cache hit rate: 66.9%
+2025-10-22T12:51:03.993520+00:00 [vllm] INFO: Sending SIGINT for shutdown (supervisor shutdown)
+2025-10-22T12:51:04.000287+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m WARNING 10-22 21:51:03 [launcher.py:98] port 8000 is used by process psutil.Process(pid=19253, name='vllm', status='running') launched with command:
+2025-10-22T12:51:04.000376+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m WARNING 10-22 21:51:03 [launcher.py:98] /home/joey/k0j0/gradi/0_server/.venv/bin/python3 /home/joey/k0j0/gradi/0_server/.venv/bin/vllm serve hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4 --quantization gptq_marlin --dtype half --max-model-len 4096 --gpu-memory-utilization 0.82 --tensor-parallel-size 1 --enforce-eager
+2025-10-22T12:51:04.000435+00:00 [vllm:stdout] [1;36m(APIServer pid=19253)[0;0m INFO 10-22 21:51:04 [launcher.py:101] Shutting down FastAPI HTTP server.
+2025-10-22T12:51:04.258022+00:00 [vllm:stderr] [1;36m(APIServer pid=19253)[0;0m INFO:     Shutting down
+2025-10-22T12:51:04.358641+00:00 [vllm:stderr] [1;36m(APIServer pid=19253)[0;0m INFO:     Waiting for application shutdown.
+2025-10-22T12:51:04.358771+00:00 [vllm:stderr] [1;36m(APIServer pid=19253)[0;0m INFO:     Application shutdown complete.
+2025-10-22T12:51:04.552858+00:00 [vllm] INFO: Process exited with code 0
