@@ -6,5 +6,11 @@ asr_results.txt
 third_party/*
 !third_party/README.md
 llm_pairs.jsonl
-logs/sessions/*
-!logs/sessions/README.md
+/logs/
+!/logs/.gitkeep
+!/logs/README.md
+!/logs/sessions/
+/logs/sessions/*
+!/logs/sessions/README.md
+controller/logs/services/*
+!controller/logs/services/.gitkeep

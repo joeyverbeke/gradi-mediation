@@ -25,13 +25,15 @@ class VLLMConfig:
     timeout: float = 30.0
     system_prompt: str = (
         "You perfect automatic speech recognition transcripts."
+        " If the transcript is not in English, translate it to a perfected English version."
         " Return only the corrected transcript with no explanations,"
         " headers, or meta commentary. If the transcript is blank or contains"
         " only noise markers, respond with the token [NO_SPEECH]."
     )
     stop: Sequence[str] = ()
     user_prompt_template: str = (
-        "Rewrite the transcript into clean, fluent text in the same language."
+        "Rewrite the transcript into clean, fluent text."
+        " If the transcript is not in English, translate it to a perfected English version."
         " Do not add new information or commentary. Output the corrected text only."
         " If the transcript is blank, non-speech, or noise markers such as"
         " [BLANK_AUDIO], reply with [NO_SPEECH].\n\nTranscript:\n{transcript}\n\nCorrected text:"
