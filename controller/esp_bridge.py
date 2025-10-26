@@ -53,6 +53,7 @@ class ESPAudioBridge:
         self._serial.reset_output_buffer()
         self._rx_buffer = bytearray()
         self._capture_paused = False
+        self._presence_active: Optional[bool] = None
         saw_ready = self._await_ready_banner()
         if not saw_ready and self._verbose:
             self._log("<=", "READY banner not observed; continuing")
@@ -60,6 +61,7 @@ class ESPAudioBridge:
         self._send_command("PAUSE")
         self._capture_paused = True
         self.flush_input()
+        self._sync_presence_state()
         self.resume_capture()
 
     # ------------------------------------------------------------------
@@ -80,8 +82,24 @@ class ESPAudioBridge:
             if not text:
                 continue
             self._log("<=", text)
+            self._handle_text_line(text)
             if text == "READY":
                 return True
+
+    def _sync_presence_state(self) -> None:
+        """Request the latest PRESENCE state and wait briefly for a reply."""
+
+        self._send_command("PRESENCE?")
+        self._wait_for_presence_state(timeout=1.5)
+
+    def _wait_for_presence_state(self, timeout: float) -> None:
+        deadline = time.monotonic() + max(0.0, timeout)
+        while self._presence_active is None and time.monotonic() < deadline:
+            remaining = max(0.0, deadline - time.monotonic())
+            frame = self._read_next_frame(remaining)
+            if frame is not None and frame[0] == FRAME_TYPE_AUDIO:
+                # Ignore any audio chunks encountered while we're paused.
+                continue
 
     # ------------------------------------------------------------------
     # Logging helpers
@@ -99,6 +117,18 @@ class ESPAudioBridge:
 
     def flush_output(self) -> None:
         self._serial.reset_output_buffer()
+
+    @property
+    def presence_active(self) -> Optional[bool]:
+        return self._presence_active
+
+    def poll_presence(self, timeout: float = 0.05) -> None:
+        """Drain text frames to pick up PRESENCE telemetry while capture is paused."""
+
+        frame = self._read_next_frame(max(0.0, timeout))
+        if frame is not None and frame[0] == FRAME_TYPE_AUDIO:
+            # Drop any unexpected audio payload read during polling.
+            return
 
     def read_audio_chunk(self, *, timeout: float = 1.0) -> Optional[bytes]:
         """Read the next audio frame payload as raw PCM bytes."""
@@ -209,6 +239,7 @@ class ESPAudioBridge:
             text = line.decode("utf-8", errors="replace").strip()
             if text:
                 self._log("<=", text)
+                self._handle_text_line(text)
             return None
 
         if len(self._rx_buffer) < FRAME_HEADER_SIZE:
@@ -235,3 +266,9 @@ class ESPAudioBridge:
         payload = bytes(self._rx_buffer[FRAME_HEADER_SIZE:total_len])
         del self._rx_buffer[:total_len]
         return frame_type, payload
+
+    def _handle_text_line(self, text: str) -> None:
+        if text == "PRESENCE ON":
+            self._presence_active = True
+        elif text == "PRESENCE OFF":
+            self._presence_active = False

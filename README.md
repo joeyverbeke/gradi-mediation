@@ -4,7 +4,7 @@
 Gradi Mediation implements an end-to-end speech mediation loop. Audio is captured on an ESP32-S3 with an ICS-43434 microphone, gated on the desktop with WebRTC VAD, transcribed by whisper.cpp, Faster-Whisper, or Vosk, refined through a vLLM prompt, and synthesised by Kokoro-FastAPI for playback on dual MAX98357A speakers. The desktop drives the state machine so that the microphone and speakers never contend.
 
 ## Hardware & Services
-- ESP32-S3 + ICS-43434 mic + dual MAX98357A amplifiers, connected over USB CDC.
+- ESP32-S3 + ICS-43434 mic + dual MAX98357A amplifiers, connected over USB CDC, plus the Seeed Studio XIAO 24 GHz mmWave radar (pins D1/D4) that gates the entire stack with `PRESENCE ON/OFF` telemetry.
 - Desktop services: WebRTC VAD (Python), ASR engines (whisper.cpp, Faster-Whisper, or Vosk), vLLM text transformer, Kokoro-FastAPI TTS.
 - Optional GPU acceleration for Faster-Whisper when `--fw-device cuda` is selected.
 
@@ -42,6 +42,8 @@ Gradi Mediation implements an end-to-end speech mediation loop. Audio is capture
   uv run scripts/esp_audio_tester.py --port /dev/ttyACM0 play --input esp_mic_test.wav --target-rate 16000
   ```
   The helper script now performs the `READY`/`RESUME` handshake automatically and reads binary audio frames (`AUD0` headers) from the ESP stream.
+
+- **Presence gate** – run the session controller (or any serial client) with `--verbose-esp` and watch for `PRESENCE ON/OFF` while moving within ~30 cm of the radar. Audio frames only arrive while the sensor reports ON, and the controller logs `PresenceIdle` / `PresenceActive` transitions accordingly.
 - **Desktop VAD**
   ```bash
   uv run scripts/vad_test.py esp_mic_test.wav --aggressiveness 2

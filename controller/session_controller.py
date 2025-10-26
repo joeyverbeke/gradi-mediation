@@ -96,6 +96,7 @@ class SessionController:
         self._capture_started_at: Optional[float] = None
         self._stop_requested = False
         self._capture_suspended_until: float = 0.0
+        self._presence_state: Optional[bool] = None
 
         self._log_path = config.log_path
         self._log_file = None
@@ -125,6 +126,9 @@ class SessionController:
             if self._processing_segment:
                 # Drain serial input but do not feed VAD while busy.
                 self.esp.read_audio_chunk(timeout=0.2)
+                continue
+
+            if self._presence_blocks_capture():
                 continue
 
             try:
@@ -445,6 +449,29 @@ class SessionController:
         if lower in {"(upbeat music)", "(background noise)", "(silence)"}:
             return True
 
+        return False
+
+    def _presence_blocks_capture(self) -> bool:
+        presence = self.esp.presence_active
+        if presence is None:
+            self.esp.poll_presence(timeout=0.05)
+            return False
+
+        if presence is False:
+            if self._presence_state is not False:
+                self._transition("PresenceIdle", reason="presence.off")
+                self.vad_stream.reset()
+                self.esp.flush_input()
+                self._current_session_id = None
+                self._capture_started_at = None
+            self._presence_state = False
+            self.esp.poll_presence(timeout=0.05)
+            time.sleep(0.05)
+            return True
+
+        if self._presence_state is False:
+            self._transition("PresenceActive", reason="presence.on")
+        self._presence_state = True
         return False
 
     @staticmethod

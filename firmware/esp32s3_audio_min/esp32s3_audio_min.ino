@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <cstring>
 #include <math.h>
+#include <mmwave_for_xiao.h>
 #include "driver/i2s.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
@@ -10,6 +11,14 @@ static constexpr int SERIAL_BAUD    = 921600;
 static constexpr uint32_t AUDIO_MAGIC = 0x30445541; // 'AUD0' little-endian
 static constexpr uint8_t AUDIO_VERSION = 1;
 static constexpr uint8_t FRAME_TYPE_AUDIO = 1;
+
+// ===== Presence gate (Seeed 24 GHz mmWave) =====
+static constexpr int PIN_RADAR_RX = 2;  // D1 -> GPIO2 (radar TX -> ESP RX)
+static constexpr int PIN_RADAR_TX = 5;  // D4 -> GPIO5 (radar RX <- ESP TX)
+static constexpr int RADAR_BAUD = 256000;
+static constexpr int PRESENCE_THRESHOLD_MM = 30;
+static constexpr uint16_t POLL_DELAY_NO_PRESENCE_MS = 20;
+static constexpr uint16_t POLL_DELAY_PRESENCE_MS = 100;
 
 // ===== MIC -> HOST config =====
 static constexpr int MIC_SAMPLE_RATE   = 16000;   // capture rate
@@ -47,6 +56,13 @@ static QueueHandle_t spkEventQueue = nullptr;
 static uint32_t spkSamplesInFlight = 0;
 static bool playbackDonePending    = false;
 
+// ===== Presence gate state =====
+static HardwareSerial radarSerial(1);
+static Seeed_HSP24 radarDevice(radarSerial, Serial);
+static bool presenceActive = false;
+static bool presenceInitialized = false;
+static uint32_t lastPresencePollMs = 0;
+
 enum InboundState {
   WAITING_HEADER,
   STREAMING_PCM,
@@ -74,6 +90,55 @@ static void sendLine(const char *line) {
 
 static void publishState() {
   sendLine("STATE STREAMING");
+}
+
+static void publishPresence() {
+  sendLine(presenceActive ? "PRESENCE ON" : "PRESENCE OFF");
+}
+
+static void suspendCapturePipeline() {
+  streamSamples = 0;
+  lastFlushMs = millis();
+  i2s_zero_dma_buffer(I2S_PORT_MIC);
+}
+
+static void setPresenceState(bool detected, int distanceMm) {
+  presenceActive = detected;
+  presenceInitialized = true;
+  publishPresence();
+
+  char logBuf[64];
+  snprintf(
+      logBuf,
+      sizeof(logBuf),
+      "LOG Presence %s (%dmm)",
+      detected ? "ON" : "OFF",
+      distanceMm);
+  sendLine(logBuf);
+
+  if (!detected) {
+    suspendCapturePipeline();
+  }
+}
+
+static void updatePresenceGate() {
+  const uint32_t now = millis();
+  const uint16_t pollDelay = presenceActive ? POLL_DELAY_PRESENCE_MS : POLL_DELAY_NO_PRESENCE_MS;
+  if (now - lastPresencePollMs < pollDelay) {
+    return;
+  }
+  lastPresencePollMs = now;
+
+  const auto radarStatus = radarDevice.getStatus();
+  const int distance = radarStatus.distance;
+  if (distance == -1) {
+    return;
+  }
+
+  const bool detected = distance <= PRESENCE_THRESHOLD_MM;
+  if (!presenceInitialized || detected != presenceActive) {
+    setPresenceState(detected, distance);
+  }
 }
 
 // ----- MIC side -----
@@ -105,9 +170,15 @@ static void setupI2SMicrophone() {
   ESP_ERROR_CHECK(i2s_set_clk(I2S_PORT_MIC, MIC_SAMPLE_RATE, I2S_BITS_PER_SAMPLE_32BIT, I2S_CHANNEL_MONO));
 }
 
+static void setupRadar() {
+  radarSerial.begin(RADAR_BAUD, SERIAL_8N1, PIN_RADAR_RX, PIN_RADAR_TX);
+  sendLine("LOG Radar UART ready");
+  publishPresence();
+}
+
 static void sendAudioChunk() {
   if (streamSamples == 0) return;
-  if (!micStreamingEnabled) {
+  if (!micStreamingEnabled || !presenceActive) {
     streamSamples = 0;
     lastFlushMs = millis();
     return;
@@ -242,6 +313,8 @@ static void handleHeaderByte(char c) {
 
     if (strcmp(headerBuffer, "STATE?") == 0) {
       publishState();
+    } else if (strcmp(headerBuffer, "PRESENCE?") == 0) {
+      publishPresence();
     } else if (strcmp(headerBuffer, "PAUSE") == 0) {
       micStreamingEnabled = false;
     } else if (strcmp(headerBuffer, "RESUME") == 0) {
@@ -346,6 +419,7 @@ void setup() {
   setupI2SMicrophone();
   configureI2SSpeaker(spkSampleRateHz);
   playBootTone();
+  setupRadar();
 
   micStreamingEnabled = false;
   sendLine("READY");
@@ -353,9 +427,17 @@ void setup() {
 }
 
 void loop() {
+  updatePresenceGate();
   pollSpeakerEvents();
   // 1) Service inbound speaker stream and commands first to avoid RX overflow
   handleInboundSerial();
+
+  if (!presenceActive) {
+    streamSamples = 0;
+    lastFlushMs = millis();
+    delay(5);
+    return;
+  }
 
   // 2) Capture mic frames and push to host
   static int32_t micBuffer[256];
