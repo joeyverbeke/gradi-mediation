@@ -103,8 +103,9 @@ The controller writes structured JSONL logs to `logs/sessions/` and ensures the 
 - Configure launch parameters in `controller/services.toml` (paths, virtualenvs, CLI flags). Tilde and relative paths expand from the manifest location.
 - Start all dependencies plus `gradi-mediate` with one command:
   ```bash
-  uv run controller/startup.py up --attach gradi-mediate
+  uv run controller/startup.py up --port /dev/ttyACM0 --attach gradi-mediate
   ```
+  Adjust `--port` for your ESP32-S3; omit it to fall back to the manifest value or `/dev/ttyACM0`.
 - Check status or stream logs without restarting:
   ```bash
   uv run controller/startup.py status

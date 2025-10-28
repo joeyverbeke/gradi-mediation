@@ -12,7 +12,7 @@ import random
 import signal
 import sys
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
@@ -31,6 +31,7 @@ if sys.platform == "win32":  # pragma: no cover - Windows not targeted
     raise SystemExit("The supervisor is intended for POSIX platforms only.")
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent / "services.toml"
+DEFAULT_SERIAL_PORT = "/dev/ttyACM0"
 
 
 def _utc_now() -> datetime:
@@ -93,6 +94,38 @@ class SupervisorSpec:
     log_dir: Path
     state_dir: Path
     default_grace_period: float
+
+
+def _extract_serial_port(services: Sequence[ServiceSpec]) -> Optional[str]:
+    """Return the first serial port defined in service commands, if any."""
+    for service in services:
+        command = list(service.command)
+        for index, token in enumerate(command):
+            if token == "--port" and index + 1 < len(command):
+                return command[index + 1]
+    return None
+
+
+def _override_service_port(service: ServiceSpec, port: str) -> ServiceSpec:
+    """Replace any --port argument in the service command."""
+    command = list(service.command)
+    updated = False
+    index = 0
+    while index < len(command):
+        if command[index] == "--port" and index + 1 < len(command):
+            command[index + 1] = port
+            updated = True
+            index += 2
+            continue
+        index += 1
+    if not updated:
+        return service
+    return replace(service, command=tuple(command))
+
+
+def _apply_port_override(spec: SupervisorSpec, port: str) -> SupervisorSpec:
+    services = tuple(_override_service_port(service, port) for service in spec.services)
+    return replace(spec, services=services)
 
 
 class ManifestError(RuntimeError):
@@ -700,6 +733,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     up_parser = subparsers.add_parser("up", help="Start the supervisor and all services.")
     up_parser.add_argument(
+        "--port",
+        default=None,
+        metavar="PORT",
+        help="Serial port for the ESP32-S3 bridge (overrides manifest).",
+    )
+    up_parser.add_argument(
         "--attach",
         action="append",
         default=[],
@@ -726,6 +765,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return command_logs(args)
 
     spec = load_manifest(args.config)
+    port = args.port or _extract_serial_port(spec.services) or DEFAULT_SERIAL_PORT
+    spec = _apply_port_override(spec, port)
     supervisor = Supervisor(spec, attach=args.attach)
     return asyncio.run(supervisor.run())
 
