@@ -19,6 +19,7 @@ static constexpr int RADAR_BAUD = 256000;
 static constexpr int PRESENCE_THRESHOLD_MM = 30;
 static constexpr uint16_t POLL_DELAY_NO_PRESENCE_MS = 20;
 static constexpr uint16_t POLL_DELAY_PRESENCE_MS = 100;
+static constexpr uint16_t PRESENCE_CLEAR_DELAY_MS = 1500;
 
 // ===== MIC -> HOST config =====
 static constexpr int MIC_SAMPLE_RATE   = 16000;   // capture rate
@@ -62,6 +63,7 @@ static Seeed_HSP24 radarDevice(radarSerial, Serial);
 static bool presenceActive = false;
 static bool presenceInitialized = false;
 static uint32_t lastPresencePollMs = 0;
+static uint32_t lastPresenceDetectedMs = 0;
 
 enum InboundState {
   WAITING_HEADER,
@@ -136,8 +138,25 @@ static void updatePresenceGate() {
   }
 
   const bool detected = distance <= PRESENCE_THRESHOLD_MM;
-  if (!presenceInitialized || detected != presenceActive) {
-    setPresenceState(detected, distance);
+  if (detected) {
+    lastPresenceDetectedMs = now;
+    if (!presenceInitialized || !presenceActive) {
+      setPresenceState(true, distance);
+    }
+    return;
+  }
+
+  if (!presenceInitialized) {
+    lastPresenceDetectedMs = 0;
+    setPresenceState(false, distance);
+    return;
+  }
+
+  if (presenceActive &&
+      (lastPresenceDetectedMs == 0 ||
+       (now - lastPresenceDetectedMs) >= PRESENCE_CLEAR_DELAY_MS)) {
+    setPresenceState(false, distance);
+    lastPresenceDetectedMs = 0;
   }
 }
 
