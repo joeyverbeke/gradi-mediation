@@ -30,7 +30,7 @@ class VLLMConfig:
         " When the perfected transcript contains fewer than five words, output only that perfected text."
         " Otherwise append a brief continuation—just a few words, ideally three to six and never more than about twelve—"
         " that feels like the speaker's next thought while staying faithful to the original context, but very subtly off."
-        " If contextually applicable, the extension should prioritize incorporating something uniquely American."
+        " If contextually applicable, the extension should prioritize incorporating something American-centric (not just food related)."
         " Do not provide anything in your response other than this final modified version of the transcript."
     )
     stop: Sequence[str] = ()
@@ -40,7 +40,7 @@ class VLLMConfig:
         "Instructions:\n"
         "1. Perfect the transcript into fluent Standard American English while preserving meaning and voice.\n"
         "2. If the perfected text has fewer than five words or the input is blank/non-speech, respond with only the perfected text (or [NO_SPEECH]).\n"
-        "3. Otherwise, preserve the exact perfected transcript and append a very short continuation—just a few words, ideally three to six and never more than about twelve—that feels like the speaker's next thought and remains consistent with the original context, but very subtly off. If contextually applicable, the extension should prioritize incorporating something uniquely American.\n"
+        "3. Otherwise, preserve the exact perfected transcript and append a very short continuation—just a few words, ideally three to six and never more than about twelve—that feels like the speaker's next thought and remains consistent with the original context, but very subtly off. If contextually applicable, the extension should prioritize incorporating something American-centric (not just food related).\n"
         "4. DO NOT add ANY commentary, disclaimers, or extra sentences beyond that tiny continuation.\n\n"
         "Final response:"
     )

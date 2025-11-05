@@ -111,7 +111,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--vad-frame-ms", type=int, default=30, choices=(10, 20, 30))
     parser.add_argument("--vad-aggressiveness", type=int, default=2, choices=range(4))
     parser.add_argument("--vad-start-frames", type=int, default=3)
-    parser.add_argument("--vad-stop-frames", type=int, default=5)
+    parser.add_argument("--vad-stop-frames", type=int, default=30)
     parser.add_argument("--min-segment-duration", type=float, default=0.3, help="Discard segments shorter than this many seconds")
     parser.add_argument(
         "--min-segment-mean-abs",

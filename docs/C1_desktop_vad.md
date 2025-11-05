@@ -3,6 +3,8 @@
 ## Overview
 The `desktop_vad` package wraps the WebRTC VAD engine so the desktop controller can gate audio capture windows before handing them to Whisper. It accepts 16-bit PCM frames (e.g., streamed from the ESP32 microphone capture) and emits timestamp pairs describing speech regions. The defaults are tuned for 16 kHz mono audio with modest hangover to avoid choppy segmentation.
 
+By default the processor requires roughly 900 ms of trailing silence (`stop_trigger_frames = 30` at 30 ms frames) before releasing a segment, which leaves room for natural breaths while keeping the overall response latency low.
+
 ## Module Entry Points
 - `desktop_vad.WebRTCVADProcessor`
   - Instantiate with `VADConfig` and call `.process(pcm_bytes)` or `.process_frames(frames)`.

@@ -40,7 +40,7 @@ class VADConfig:
     frame_duration_ms: int = 30
     aggressiveness: int = 2
     start_trigger_frames: int = 3
-    stop_trigger_frames: int = 5
+    stop_trigger_frames: int = 30
 
     def __post_init__(self) -> None:
         if self.sample_rate not in (8000, 16000, 32000, 48000):

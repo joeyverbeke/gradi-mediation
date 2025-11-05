@@ -87,7 +87,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--stop-trigger",
         type=int,
-        default=5,
+        default=30,
         help="Consecutive non-speech frames required to end a segment",
     )
     return parser
