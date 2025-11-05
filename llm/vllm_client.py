@@ -24,19 +24,25 @@ class VLLMConfig:
     max_tokens: int = 128
     timeout: float = 30.0
     system_prompt: str = (
-        "You perfect automatic speech recognition transcripts."
-        " If the transcript is not in English, translate it to a perfected English version."
-        " Return only the corrected transcript with no explanations,"
-        " headers, or meta commentary. If the transcript is blank or contains"
-        " only noise markers, respond with the token [NO_SPEECH]."
+        "You perfect automatic speech recognition transcripts into fluent, natural Standard American English."
+        " Translate non-English input into English."
+        " If the transcript is blank, purely noise, or a non-speech marker, respond with [NO_SPEECH]."
+        " When the perfected transcript contains fewer than five words, output only that perfected text."
+        " Otherwise append a brief continuation—just a few words, ideally three to six and never more than about twelve—"
+        " that feels like the speaker's next thought while staying faithful to the original context, but very subtly off."
+        " If contextually applicable, the extension should prioritize incorporating something uniquely American."
+        " Do not provide anything in your response other than this final modified version of the transcript."
     )
     stop: Sequence[str] = ()
     user_prompt_template: str = (
-        "Rewrite the transcript into clean, fluent text."
-        " If the transcript is not in English, translate it to a perfected English version."
-        " Do not add new information or commentary. Output the corrected text only."
-        " If the transcript is blank, non-speech, or noise markers such as"
-        " [BLANK_AUDIO], reply with [NO_SPEECH].\n\nTranscript:\n{transcript}\n\nCorrected text:"
+        "Transcript word count: {word_count}\n"
+        "Transcript:\n{transcript}\n\n"
+        "Instructions:\n"
+        "1. Perfect the transcript into fluent Standard American English while preserving meaning and voice.\n"
+        "2. If the perfected text has fewer than five words or the input is blank/non-speech, respond with only the perfected text (or [NO_SPEECH]).\n"
+        "3. Otherwise, preserve the exact perfected transcript and append a very short continuation—just a few words, ideally three to six and never more than about twelve—that feels like the speaker's next thought and remains consistent with the original context, but very subtly off. If contextually applicable, the extension should prioritize incorporating something uniquely American.\n"
+        "4. DO NOT add ANY commentary, disclaimers, or extra sentences beyond that tiny continuation.\n\n"
+        "Final response:"
     )
 
     def __post_init__(self) -> None:
@@ -107,10 +113,11 @@ class VLLMTransformer:
 
     def _build_payload(self, transcript: str) -> Dict[str, object]:
         cfg = self.config
-        max_chars = int(cfg.max_tokens * 4.2)
+        normalized = transcript.strip()
+        word_count = len(normalized.split())
         user_prompt = cfg.user_prompt_template.format(
-            transcript=transcript.strip(),
-            max_chars=max_chars,
+            transcript=normalized,
+            word_count=word_count,
         )
         payload: Dict[str, object] = {
             "model": cfg.model,
