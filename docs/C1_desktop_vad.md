@@ -16,7 +16,7 @@ By default the processor requires roughly 900 ms of trailing silence (`stop_trig
 A CLI helper mirrors the human validation protocol and lives at `scripts/vad_test.py`:
 
 ```bash
-uv run scripts/esp_audio_tester.py --port /dev/ttyACM0 record --seconds 5 --output esp_mic_test.wav  # capture from ESP
+uv run scripts/esp_audio_tester.py --port /dev/gradi-esp-mediate record --seconds 5 --output esp_mic_test.wav  # capture from ESP
 uv pip install webrtcvad  # once per venv if not already installed
 uv run scripts/vad_test.py esp_mic_test.wav
 uv run scripts/vad_test.py room_noise.wav --aggressiveness 3

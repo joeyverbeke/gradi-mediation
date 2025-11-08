@@ -10,9 +10,9 @@
 ## Build, Test, and Development Commands
 - `uv venv --python 3.10 --seed`  
   `uv pip install pyserial webrtcvad requests soundfile faster-whisper vosk` — baseline environment.
-- `uv run scripts/esp_audio_tester.py --port /dev/ttyACM0 record --seconds 5 --output esp_mic_test.wav` — exercises the binary mic stream (handles READY/PAUSE/RESUME automatically).
+- `uv run scripts/esp_audio_tester.py --port /dev/gradi-esp-mediate record --seconds 5 --output esp_mic_test.wav` — exercises the binary mic stream (handles READY/PAUSE/RESUME automatically).
 - `uv run scripts/asr_transcribe.py --asr-engine faster_whisper --fw-model-dir third_party/faster-whisper/models phrase01.wav` — smoke test Faster-Whisper; swap `--asr-engine` for `whisper_cpp` or `vosk` as needed.
-- `uv run scripts/session_controller.py --port /dev/ttyACM0 --kokoro-voice af_bella --max-cycles 1` — full Idle→Playback cycle; add `--verbose-esp` during debugging.
+- `uv run scripts/session_controller.py --port /dev/gradi-esp-mediate --kokoro-voice af_bella --max-cycles 1` — full Idle→Playback cycle; add `--verbose-esp` during debugging.
 
 ## Coding Style & Naming Conventions
 - Python: 4-space indent, type hints, `snake_case` modules, `CamelCase` dataclasses, minimal but meaningful comments.

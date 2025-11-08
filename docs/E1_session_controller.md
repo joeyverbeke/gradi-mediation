@@ -54,7 +54,7 @@ The session controller coordinates the speech loop described in the overall proj
 2. Launch the controller:
    ```bash
    uv run scripts/session_controller.py \
-     --port /dev/ttyACM0 \
+     --port /dev/gradi-esp-mediate \
      --whisper-binary third_party/whisper.cpp/build/bin/whisper-cli \
      --whisper-model third_party/whisper.cpp/models/ggml-small.bin \
      --max-cycles 5

@@ -14,7 +14,7 @@ Use `scripts/asr_transcribe.py` to mirror the human validation flow:
 
 ```bash
 # 1. Record 10 fixed phrases with the ESP bridge from step B1
-uv run scripts/esp_audio_tester.py --port /dev/ttyACM0 record --seconds 5 --output phrase01.wav
+uv run scripts/esp_audio_tester.py --port /dev/gradi-esp-mediate record --seconds 5 --output phrase01.wav
 ...
 
 # 2. Transcribe all WAVs with whisper.cpp

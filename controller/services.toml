@@ -79,7 +79,7 @@ command = [
   "run",
   "scripts/session_controller.py",
   "--port",
-  "/dev/ttyACM0",
+  "/dev/gradi-esp-mediate",
   "--asr-engine",
   "faster_whisper",
   "--fw-model-dir",

@@ -33,9 +33,9 @@ The `firmware/esp32s3_audio_min/esp32s3_audio_min.ino` sketch keeps only the per
 
 ## Desktop Test Script
 - Create a Python environment with uv: `uv venv --python 3.10 --seed` and install PySerial: `uv pip install pyserial`.
-- `uv run scripts/esp_audio_tester.py --port /dev/ttyACM0 record --seconds 5 --output esp_mic_test.wav`
+- `uv run scripts/esp_audio_tester.py --port /dev/gradi-esp-mediate record --seconds 5 --output esp_mic_test.wav`
   - Flushes buffered audio, resumes capture, then accumulates `seconds × 16 kHz × 16-bit` PCM from successive binary frames and writes a WAV wrapper.
-- `uv run scripts/esp_audio_tester.py --port /dev/ttyACM0 play --input esp_mic_test.wav --target-rate 16000`
+- `uv run scripts/esp_audio_tester.py --port /dev/gradi-esp-mediate play --input esp_mic_test.wav --target-rate 16000`
   - Validates the WAV header, folds multi-channel audio to mono, optionally downsamples to the requested rate, streams 16-bit PCM in paced 1 kB chunks, and issues `END` when complete.
 - The script surfaces protocol timeouts and malformed headers immediately so the acceptance checks remain hands free.
 

@@ -31,7 +31,7 @@ if sys.platform == "win32":  # pragma: no cover - Windows not targeted
     raise SystemExit("The supervisor is intended for POSIX platforms only.")
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent / "services.toml"
-DEFAULT_SERIAL_PORT = "/dev/ttyACM0"
+DEFAULT_SERIAL_PORT = "/dev/gradi-esp-mediate"
 
 
 def _utc_now() -> datetime:

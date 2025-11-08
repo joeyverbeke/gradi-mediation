@@ -27,7 +27,7 @@ Gradi Mediation orchestrates an end-to-end speech mediation loop. Audio is captu
 Use the controller once the ESP and backend services are reachable:
 ```bash
 uv run scripts/session_controller.py \
-  --port /dev/ttyACM0 \
+  --port /dev/gradi-esp-mediate \
   --asr-engine faster_whisper \
   --fw-model-dir third_party/faster-whisper/models \
   --kokoro-voice af_bella
@@ -37,9 +37,9 @@ Switch `--asr-engine` and supply the corresponding flags for whisper.cpp or Vosk
 ### Supervisor
 Update `controller/services.toml` to reflect your workspace (venv path, model folders, CLI flags). Launch the service bundle with:
 ```bash
-uv run controller/startup.py up --port /dev/ttyACM0 --attach gradi-mediate
+uv run controller/startup.py up --port /dev/gradi-esp-mediate --attach gradi-mediate
 ```
-Omit `--port` to reuse the manifest setting or fall back to `/dev/ttyACM0`. While the supervisor runs you can inspect state and logs from another shell:
+Omit `--port` to reuse the manifest setting or fall back to `/dev/gradi-esp-mediate`. While the supervisor runs you can inspect state and logs from another shell:
 ```bash
 uv run controller/startup.py status
 uv run controller/startup.py logs vllm --lines 80

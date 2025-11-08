@@ -28,12 +28,18 @@ from desktop_vad import VADConfig
 from llm import VLLMConfig, VLLMTransformer
 from tts import KokoroConfig, KokoroStreamer
 
+DEFAULT_SERIAL_PORT = "/dev/gradi-esp-mediate"
+
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Coordinate capture → ASR → LLM → TTS playback cycles",
     )
-    parser.add_argument("--port", required=True, help="Serial port for the ESP32-S3 (e.g. /dev/ttyACM0)")
+    parser.add_argument(
+        "--port",
+        default=DEFAULT_SERIAL_PORT,
+        help=f"Serial port for the ESP32-S3 (default: {DEFAULT_SERIAL_PORT})",
+    )
     parser.add_argument("--baud", type=int, default=921_600, help="Serial baudrate (default 921600)")
     parser.add_argument(
         "--asr-engine",

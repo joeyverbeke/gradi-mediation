@@ -20,6 +20,7 @@ if str(ROOT) not in sys.path:
 
 from controller.esp_bridge import ESPAudioBridge, SerialTimeoutError
 
+DEFAULT_SERIAL_PORT = "/dev/gradi-esp-mediate"
 DEFAULT_BAUD = 921_600
 MIC_SAMPLE_RATE = 16_000
 BYTES_PER_SAMPLE = 2
@@ -150,7 +151,11 @@ def parse_args() -> argparse.Namespace:
             "Capture timed audio from the continuous ESP32-S3 microphone stream and send START/END playback jobs."
         ),
     )
-    parser.add_argument("--port", required=True, help="Serial port for the ESP32-S3 (e.g. /dev/ttyACM0)")
+    parser.add_argument(
+        "--port",
+        default=DEFAULT_SERIAL_PORT,
+        help=f"Serial port for the ESP32-S3 (default: {DEFAULT_SERIAL_PORT})",
+    )
     parser.add_argument(
         "--baud",
         type=int,
