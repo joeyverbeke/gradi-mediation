@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import math
 import time
+from array import array
 from typing import Optional, Tuple
 
 import serial
@@ -12,11 +14,40 @@ DEFAULT_BAUD = 921_600
 SERIAL_READ_TIMEOUT = 0.2  # seconds per underlying read
 BYTES_PER_SAMPLE = 2
 STREAM_CHUNK_BYTES = 1024
+DEFAULT_HIGHPASS_CUTOFF_HZ = 250.0
 
 AUDIO_MAGIC = 0x30445541  # 'AUD0' little-endian
 AUDIO_VERSION = 1
 FRAME_TYPE_AUDIO = 1
 FRAME_HEADER_SIZE = 12
+
+
+class HighPassFilter:
+    """Simple first-order high-pass filter with int16 clamping."""
+
+    def __init__(self, alpha: float) -> None:
+        self.alpha = alpha
+        self.prev_input: float = 0.0
+        self.prev_output: float = 0.0
+
+    def reset(self) -> None:
+        self.prev_input = 0.0
+        self.prev_output = 0.0
+
+    def process_sample(self, sample: int) -> int:
+        output = self.alpha * (self.prev_output + sample - self.prev_input)
+        self.prev_input = float(sample)
+        self.prev_output = output
+        clamped = max(min(int(round(output)), 32767), -32768)
+        return clamped
+
+
+def _compute_high_pass_alpha(sample_rate: int, cutoff_hz: float = DEFAULT_HIGHPASS_CUTOFF_HZ) -> float:
+    if sample_rate <= 0:
+        raise ValueError("sample_rate must be positive")
+    rc = 1.0 / (2.0 * math.pi * cutoff_hz)
+    dt = 1.0 / float(sample_rate)
+    return rc / (rc + dt)
 
 
 class SerialTimeoutError(RuntimeError):
@@ -63,6 +94,7 @@ class ESPAudioBridge:
         self.flush_input()
         self._sync_presence_state()
         self.resume_capture()
+        self._high_pass_filter: Optional[HighPassFilter] = None
 
     # ------------------------------------------------------------------
     # Lifecycle helpers
@@ -182,10 +214,30 @@ class ESPAudioBridge:
         sample_count = len(pcm) // BYTES_PER_SAMPLE
         header = f"START {sample_rate} 1 16 {sample_count}"
         self.write_line(header)
-        self._stream_bytes(pcm, sample_rate * BYTES_PER_SAMPLE)
+        high_pass = self._prepare_high_pass_filter(sample_rate)
+        self._stream_bytes(
+            pcm,
+            sample_rate * BYTES_PER_SAMPLE,
+            high_pass_filter=high_pass,
+        )
         self.write_line("END")
 
-    def _stream_bytes(self, payload: bytes, bytes_per_second: int) -> None:
+    def _prepare_high_pass_filter(self, sample_rate: int) -> HighPassFilter:
+        alpha = _compute_high_pass_alpha(sample_rate)
+        if self._high_pass_filter is None:
+            self._high_pass_filter = HighPassFilter(alpha)
+        else:
+            self._high_pass_filter.alpha = alpha
+            self._high_pass_filter.reset()
+        return self._high_pass_filter
+
+    def _stream_bytes(
+        self,
+        payload: bytes,
+        bytes_per_second: int,
+        *,
+        high_pass_filter: Optional[HighPassFilter] = None,
+    ) -> None:
         if bytes_per_second <= 0:
             raise ValueError("bytes_per_second must be positive")
         chunk_size = STREAM_CHUNK_BYTES
@@ -193,6 +245,12 @@ class ESPAudioBridge:
         for start in range(0, len(payload), chunk_size):
             end = start + chunk_size
             chunk = payload[start:end]
+            if high_pass_filter is not None:
+                samples = array("h")
+                samples.frombytes(chunk)
+                for i, sample in enumerate(samples):
+                    samples[i] = high_pass_filter.process_sample(sample)
+                chunk = samples.tobytes()
             written = self._serial.write(chunk)
             if written != len(chunk):  # pragma: no cover - serial guard
                 raise SerialTimeoutError(
