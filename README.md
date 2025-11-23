@@ -27,7 +27,6 @@ Gradi Mediation orchestrates an end-to-end speech mediation loop. Audio is captu
 Use the controller once the ESP and backend services are reachable:
 ```bash
 uv run scripts/session_controller.py \
-  --port /dev/gradi-esp-mediate \
   --asr-engine faster_whisper \
   --fw-model-dir third_party/faster-whisper/models \
   --kokoro-voice af_bella
