@@ -56,6 +56,7 @@ class SessionControllerConfig:
 
     sample_rate: int = 16_000
     playback_sample_rate: int = 16_000
+    playback_gain_db: float = 0.0
     vad_config: VADConfig = field(default_factory=VADConfig)
     vad_preroll_frames: int = 2
     max_capture_seconds: Optional[float] = None
@@ -398,6 +399,7 @@ class SessionController:
             sample_rate = self.config.tts_expected_sample_rate
 
         pcm, sample_rate = self._resample_if_needed(pcm, sample_rate, self.config.playback_sample_rate)
+        pcm = self._apply_gain(pcm, self.config.playback_gain_db)
         playback_start = time.monotonic()
         self._transition(
             "Playback",
@@ -565,6 +567,21 @@ class SessionController:
                         except ValueError:
                             continue
         return None
+
+    @staticmethod
+    def _apply_gain(pcm: bytes, gain_db: float) -> bytes:
+        if not pcm or gain_db == 0.0:
+            return pcm
+        factor = math.pow(10.0, gain_db / 20.0)
+        samples = array("h", pcm)
+        for i, sample in enumerate(samples):
+            amplified = int(round(sample * factor))
+            if amplified > 32767:
+                amplified = 32767
+            elif amplified < -32768:
+                amplified = -32768
+            samples[i] = amplified
+        return samples.tobytes()
 
     @staticmethod
     def _resample_if_needed(pcm: bytes, src_rate: int, target_rate: int) -> tuple[bytes, int]:

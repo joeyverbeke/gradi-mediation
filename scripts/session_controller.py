@@ -111,6 +111,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Additional JSON payload fields forwarded to Kokoro (repeatable)",
     )
     parser.add_argument("--playback-rate", type=int, default=16_000, help="Playback sample rate for ESP (default 16000)")
+    parser.add_argument("--playback-gain-db", type=float, default=0.0, help="Gain in dB applied to TTS audio before playback (default 0.0)")
     parser.add_argument("--tts-expected-rate", type=int, default=24_000, help="Expected Kokoro sample rate")
     parser.add_argument("--log-dir", type=Path, default=Path("logs/sessions"), help="Directory to write JSONL session logs")
     parser.add_argument("--max-cycles", type=int, default=None, help="Stop after N cycles (default unlimited)")
@@ -228,6 +229,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     controller_cfg = SessionControllerConfig(
         sample_rate=vad_cfg.sample_rate,
         playback_sample_rate=args.playback_rate,
+        playback_gain_db=args.playback_gain_db,
         vad_config=vad_cfg,
         tts_expected_sample_rate=args.tts_expected_rate,
         log_path=log_path,
