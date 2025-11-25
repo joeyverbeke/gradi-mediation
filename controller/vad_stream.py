@@ -126,6 +126,19 @@ class VADStream:
         self._silence_run = 0
         self._start_frame = 0
 
+    def force_close(self) -> SpeechSegment | None:
+        """Force-finish the current segment if active (used for timeouts)."""
+
+        if not self._active:
+            return None
+        start_byte = self._start_frame * self._frame_bytes
+        end_byte = self._processed_bytes + self._cursor
+        if end_byte < start_byte:
+            end_byte = start_byte
+        segment = self._slice_segment(start_byte, end_byte)
+        self._reset_after_segment(end_byte)
+        return segment
+
     def _slice_segment(self, start_byte: int, end_byte: int) -> SpeechSegment:
         start_rel = start_byte - self._processed_bytes
         end_rel = end_byte - self._processed_bytes

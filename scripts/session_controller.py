@@ -120,6 +120,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--vad-stop-frames", type=int, default=30)
     parser.add_argument("--min-segment-duration", type=float, default=0.3, help="Discard segments shorter than this many seconds")
     parser.add_argument(
+        "--max-capture-seconds",
+        type=float,
+        default=None,
+        help="Maximum length of a capture window before forcing timeout",
+    )
+    parser.add_argument(
         "--min-segment-mean-abs",
         type=float,
         default=200.0,
@@ -228,6 +234,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         min_segment_duration=args.min_segment_duration,
         min_mean_abs_amplitude=args.min_segment_mean_abs,
         capture_resume_delay=args.capture_resume_delay,
+        max_capture_seconds=args.max_capture_seconds,
     )
 
     try:

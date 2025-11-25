@@ -128,6 +128,39 @@ class SessionController:
                 self.esp.read_audio_chunk(timeout=0.2)
                 continue
 
+            if (
+                self.config.max_capture_seconds is not None
+                and self._capture_started_at is not None
+                and self.state == "CaptureRequested"
+            ):
+                elapsed = time.monotonic() - self._capture_started_at
+                if elapsed > self.config.max_capture_seconds:
+                    self._transition(
+                        "CaptureRequested",
+                        reason="capture.timeout_6s",
+                        duration=elapsed,
+                    )
+                    segment = self.vad_stream.force_close()
+                    if segment is not None:
+                        success = self._handle_segment(segment, allow_timeout_segment=True)
+                        if success:
+                            cycles_completed += 1
+                            idle_reason = "cycle.complete"
+                        else:
+                            idle_reason = "cycle.discarded"
+                        self._transition("Idle", reason=idle_reason, cycles=cycles_completed)
+                        self._current_session_id = None
+                        self._capture_started_at = None
+                        if max_cycles is not None and cycles_completed >= max_cycles:
+                            return
+                    else:
+                        self.vad_stream.reset()
+                        self.esp.flush_input()
+                        self._transition("Idle", reason="capture.timeout")
+                        self._current_session_id = None
+                        self._capture_started_at = None
+                    continue
+
             if self._presence_blocks_capture():
                 continue
 
@@ -190,7 +223,7 @@ class SessionController:
             start_byte=event.start_byte,
         )
 
-    def _handle_segment(self, segment: SpeechSegment) -> bool:
+    def _handle_segment(self, segment: SpeechSegment, *, allow_timeout_segment: bool = False) -> bool:
         if self._current_session_id is None:
             self._current_session_id = uuid.uuid4().hex[:8]
         self._processing_segment = True
@@ -207,18 +240,19 @@ class SessionController:
             self.esp.flush_input()
             return False
 
-        if (
-            self.config.max_capture_seconds is not None
-            and segment_duration > self.config.max_capture_seconds
-        ):
-            self._transition(
-                "ErrorTimeout",
-                stage="capture",
-                reason="segment.too_long",
-                duration=segment_duration,
-            )
-            self._processing_segment = False
-            return False
+        if not allow_timeout_segment:
+            if (
+                self.config.max_capture_seconds is not None
+                and segment_duration > self.config.max_capture_seconds
+            ):
+                self._transition(
+                    "ErrorTimeout",
+                    stage="capture",
+                    reason="segment.too_long",
+                    duration=segment_duration,
+                )
+                self._processing_segment = False
+                return False
 
         mean_abs_amplitude = self._segment_mean_abs_amplitude(segment.pcm)
         if mean_abs_amplitude < self.config.min_mean_abs_amplitude:
